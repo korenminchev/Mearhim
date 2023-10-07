@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 const CreateListing = () => {
     const router = useRouter();
     const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
     const [city, setCity] = useState('');
     const [capacity, setCapacity] = useState(0);
@@ -20,7 +19,6 @@ const CreateListing = () => {
             .insert([
                 {
                     name,
-                    address,
                     phone,
                     city,
                     capacity,
