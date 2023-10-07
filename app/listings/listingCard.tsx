@@ -10,7 +10,7 @@ type ListingCardProps = {
 
 export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
     return (
-        <Box w={"100%"} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4} mb={4} h="175px">
+        <Box w={"100%"} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4} mb={4}>
             <Flex direction="row">
                 <Box flex="2" pb="4">
                     <Text fontWeight="semibold" mb={2}>
