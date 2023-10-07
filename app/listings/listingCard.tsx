@@ -17,7 +17,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
                         מארח: {listing.name}
                     </Text>
                     <Text fontWeight="semibold">{listing.city}</Text>
-                    <Text>כתובת: {listing.address}</Text>
                     <Text mb={1}>קיבולת: {listing.capacity}</Text>
                     <Text mb={1}>תיאור: {listing.description || 'אין תיאור'}</Text>
                 </Box>

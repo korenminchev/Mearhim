@@ -49,10 +49,6 @@ const CreateListing = () => {
                 <Input value={city} onChange={(e) => setCity(e.target.value)} />
             </FormControl>
             <FormControl>
-                <FormLabel>כתובת (לא חייב כתובת מדוייקת)</FormLabel>
-                <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-            </FormControl>
-            <FormControl>
                 <FormLabel>מספר טלפון</FormLabel>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </FormControl>
