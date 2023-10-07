@@ -14,6 +14,16 @@ const CreateListing = () => {
     const [description, setDescription] = useState('');
 
     const handleSubmit = async () => {
+        setName(name.trim());
+        setPhone(phone.trim());
+        setCity(city.trim());
+        setDescription(description.trim());
+
+        if (name == "" || phone == "" || city == "") {
+            alert('אנא מלא/י את כל הפרטים');
+            return;
+        }
+
         const { data, error } = await supabase
             .from('listings')
             .insert([
@@ -27,31 +37,31 @@ const CreateListing = () => {
             ]);
 
         if (!error) {
-            alert('המודעה נוצרה בהצלחה');
+            alert('המודעה נוצרה בהצלחה, אנו מודים לך על העזרה 🙏❤️');
             router.push('/');
             // Reset form or redirect as needed
         } else {
-            alert(`Error: ${error?.message || 'Unknown error'}`);
+            alert(`שגיאה: ${error?.message || 'Unknown error'}`);
         }
     };
 
     return (
         <Center>
         <VStack w={"80%"} spacing={4} align="center" mt={10}>
-            <FormControl>
+            <FormControl isRequired={true}>
                 <FormLabel>שם המארח</FormLabel>
                 <Input value={name} onChange={(e) => setName(e.target.value)} />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired={true}>
                 <FormLabel>עיר</FormLabel>
                 <Input value={city} onChange={(e) => setCity(e.target.value)} />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired={true}>
                 <FormLabel>מספר טלפון</FormLabel>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </FormControl>
-            <FormControl>
-                <FormLabel>כמות אנשים אפשרית לאירוח</FormLabel>
+            <FormControl isRequired={true}>
+                <FormLabel>כמות אנשים מקסימלית לאירוח</FormLabel>
                 <Input type="number" value={capacity} onChange={(e) => setCapacity(parseInt(e.target.value))} />
             </FormControl>
             <FormControl>
@@ -59,7 +69,7 @@ const CreateListing = () => {
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
             </FormControl>
             <Button mt={4} onClick={handleSubmit}>
-                Create Listing
+                פרסם מודעה
             </Button>
         </VStack>
         </Center>
