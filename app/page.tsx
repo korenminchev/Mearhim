@@ -59,9 +59,14 @@ const Listings = () => {
                     ></ReadMoreComponent>
                 </Center>
                 <VStack spacing={4}>
-                    <Link href="https://wa.me/+972548816044?text=היי%20אני%20רוצה%20להסיר%20מודעה%20מהאתר" target="_blank" passHref>
+                    <Link href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..." target="_blank" passHref>
                         <Button variant={"link"} colorScheme="red">
-                        מחיקת מודעה קיימת
+                        לעריכת/הסרת מודעה קיימת
+                        </Button>
+                    </Link>
+                    <Link href="https://wa.me/+972548816044" target="_blank" passHref>
+                        <Button variant={"link"} colorScheme="teal">
+                        למידע נוסף ושאלות
                         </Button>
                     </Link>
                     <Input placeholder="חיפוש לפי עיר" value={search} onChange={(e) => setSearch(e.target.value)} />
