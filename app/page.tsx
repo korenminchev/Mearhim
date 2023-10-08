@@ -65,6 +65,11 @@ const Listings = () => {
                     ></ReadMoreComponent>
                 </Center>
                 <VStack spacing={4}>
+                    <Link href="/postListing" passHref>
+                        <Button variant={"link"} colorScheme="green">
+                        לפרסום מודעה חדשה
+                        </Button>
+                    </Link>
                     <Link href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..." target="_blank" passHref>
                         <Button variant={"link"} colorScheme="red">
                         לעריכת/הסרת מודעה קיימת
@@ -93,11 +98,6 @@ const Listings = () => {
                 </Box>
             ))}
         </Grid>
-        <Link href="/postListing" passHref>
-        <Button position="fixed" bottom="2rem" left="2rem" colorScheme="green" size="md" boxShadow="xl" borderRadius="8" dropShadow={"base"}>
-            יצירת מודעה
-        </Button>
-        </Link>
         </Flex>
     );
 };
