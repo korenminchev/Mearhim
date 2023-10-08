@@ -5,4 +5,5 @@ export type Listing = {
     capacity: number;
     description: string;
     phone: string;
+    active: boolean;
 };

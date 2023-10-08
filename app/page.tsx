@@ -16,8 +16,6 @@ const Listings = () => {
     const [search, setSearch] = useState<string>('');
 
     function filterListings(listings: Array<Listing>, search: string) {
-        console.log(search);
-        console.log(listings, filteredListings);
         if (!search || search.length == 0) return listings;
         return listings.filter((listing) => listing.city.toLowerCase().startsWith(search.toLowerCase()));
     }
@@ -34,7 +32,7 @@ const Listings = () => {
     const fetchListings = async () => {
         const { data, error } = await supabase
             .from('listings')
-            .select('*');
+            .select('*').eq('active', true);
         if (data) {
           setListings(data);
           setFilteredListings(data);
