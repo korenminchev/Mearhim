@@ -6,4 +6,5 @@ export type Listing = {
     description: string;
     phone: string;
     active: boolean;
+    pinned: boolean;
 };

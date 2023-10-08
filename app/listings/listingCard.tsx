@@ -7,11 +7,12 @@ import ReadMoreComponent from '@/components/read_more_component';
 
 type ListingCardProps = {
     listing: Listing;
+    backgroungColor?: string;
 };
 
-export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
+export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungColor }) => {
     return (
-        <Box w={"100%"} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
+        <Box w={"100%"} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4} background={backgroungColor}>
             <Flex direction="row">
                 <Box flex="2">
                     <Text>

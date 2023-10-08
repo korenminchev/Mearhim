@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Center, Flex, Grid, Heading, Input, VStack } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, Grid, Heading, Input, VStack, list } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import supabase from './utils/supabaseClient';
 import { Listing } from './listings/listing';
@@ -13,9 +13,17 @@ import ReadMoreComponent from '@/components/read_more_component';
 const Listings = () => {
     const [listings, setListings] = useState<Array<Listing>>([]);
     const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
+    const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
     const [search, setSearch] = useState<string>('');
 
     function filterListings(listings: Array<Listing>, search: string) {
+        // Sort descending by id
+        listings.sort((a, b) => b.id - a.id);
+
+        // Set pinned listings
+        setPinnedListings(listings.filter((listing) => listing.pinned));
+        listings = listings.filter((listing) => !listing.pinned);
+
         if (!search || search.length == 0) return listings;
         return listings.filter((listing) => listing.city.toLowerCase().startsWith(search.toLowerCase()));
     }
@@ -35,7 +43,7 @@ const Listings = () => {
             .select('*').eq('active', true);
         if (data) {
           setListings(data);
-          setFilteredListings(data);
+          setFilteredListings(filterListings(data, search));
         }
     };
 
@@ -72,6 +80,13 @@ const Listings = () => {
             </Box>
 
             <Grid w={'75%'} templateColumns="repeat(1, 1fr)" gap={4}>
+            {
+                pinnedListings.map((listing) => (
+                    <Box key={listing.id}>
+                        <ListingCard listing={listing} backgroungColor={"green.100"} />
+                    </Box>
+                ))
+            }
             {filteredListings.map((listing) => (
                 <Box key={listing.id}>
                     <ListingCard listing={listing} />
