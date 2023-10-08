@@ -8,8 +8,6 @@ import { ListingCard } from './listings/listingCard';
 import Link from 'next/link';
 import ReadMoreComponent from '@/components/read_more_component';
 
-
-
 const Listings = () => {
     const [listings, setListings] = useState<Array<Listing>>([]);
     const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
