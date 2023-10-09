@@ -24,7 +24,7 @@ const CapacityFilter: React.FC<CapacityFilterProps> = ({ capacity, onFilterChang
 
     return (
         <Box>
-            <Text mb={2} textAlign={'center'}>קיבולת מינימלית:</Text>
+            <Text mb={2} textAlign={'center'}> מס׳ מתארחים מינימלי:</Text>
             <HStack>
                 <Button onClick={(e) => decreaseCapacity(capacity)} size="sm" isDisabled={capacity === 1}>
                     -
