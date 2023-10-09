@@ -13,6 +13,7 @@ const Listings = () => {
     const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
     const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
     const [search, setSearch] = useState<string>('');
+    const [postsLimit, setPostsLimit] = useState<number>(100);
 
     function filterListings(listings: Array<Listing>, search: string) {
         // Sort descending by id
@@ -83,19 +84,21 @@ const Listings = () => {
             </Box>
 
             <Grid w={'75%'} templateColumns="repeat(1, 1fr)" gap={4}>
-            {
-                pinnedListings.map((listing) => (
+                {pinnedListings.map((listing) => (
+                        <Box key={listing.id}>
+                            <ListingCard listing={listing} backgroungColor={"green.100"} />
+                        </Box>
+                ))}
+                {filteredListings.map((listing, index) => {
+                    if (index >= postsLimit) return;
+                    return (
                     <Box key={listing.id}>
-                        <ListingCard listing={listing} backgroungColor={"green.100"} />
+                        <ListingCard listing={listing} />
                     </Box>
-                ))
-            }
-            {filteredListings.map((listing) => (
-                <Box key={listing.id}>
-                    <ListingCard listing={listing} />
-                </Box>
-            ))}
-        </Grid>
+                    )
+                })}
+            </Grid>
+            <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>הצג עוד</Button>
         </Flex>
     );
 };
