@@ -5,6 +5,7 @@ import {
   Button,
   Center,
   Container,
+  Divider,
   Flex,
   Grid,
   GridItem,
@@ -13,12 +14,13 @@ import {
   VStack,
   list,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import supabase from "./utils/supabaseClient";
 import { Listing } from "./listings/listing";
 import { ListingCard } from "./listings/listingCard";
 import Link from "next/link";
 import ReadMoreComponent from "@/components/read_more_component";
+import CapacityFilter from "@/components/capacity_filter";
 
 const Listings = () => {
   const [listings, setListings] = useState<Array<Listing>>([]);
@@ -26,6 +28,7 @@ const Listings = () => {
   const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
   const [search, setSearch] = useState<string>("");
   const [postsLimit, setPostsLimit] = useState<number>(100);
+  const [capacityFilter, setCapacityFilter] = useState<number>(2);
 
   function filterListings(listings: Array<Listing>, search: string) {
     // Sort descending by id
@@ -34,6 +37,8 @@ const Listings = () => {
     // Set pinned listings
     setPinnedListings(listings.filter((listing) => listing.pinned));
     listings = listings.filter((listing) => !listing.pinned);
+
+    listings = listings.filter((listing) => listing.capacity >= capacityFilter);
 
     if (!search || search.length == 0) return listings;
     return listings.filter((listing) =>
@@ -49,6 +54,11 @@ const Listings = () => {
     const filteredListings = filterListings(listings, search);
     setFilteredListings(filteredListings);
   }, [search]);
+
+  useEffect(() => {
+    const filteredListings = filterListings(listings, search);
+    setFilteredListings(filteredListings);
+  }, [capacityFilter]);
 
   const fetchListings = async () => {
     const { data, error } = await supabase
@@ -108,29 +118,29 @@ const Listings = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <CapacityFilter capacity={capacityFilter} onFilterChange={setCapacityFilter} />
+          <Divider />
         </VStack>
       </Box>
-      <Grid templateColumns="repeat(1, 1fr)" gap={4}>
-        {pinnedListings.map((listing) => (
-          <GridItem key={listing.id}>
-            <ListingCard listing={listing} backgroungColor={"green.100"} />
-          </GridItem>
-        ))}
+      <VStack spacing={2} w={'95%'}>
+        {pinnedListings.map((listing) => {
+          return (
+              <ListingCard key={listing.id} listing={listing} backgroungColor="green.100"/>
+          );
+        })}
         {filteredListings.map((listing, index) => {
           if (index >= postsLimit) return;
 
           return (
-            <GridItem key={listing.id}>
-              <ListingCard listing={listing} />
-            </GridItem>
+              <ListingCard key={listing.id} listing={listing} />
           );
         })}
-      </Grid>
-      {listings?.length > 0 ? (
-        <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>
-          הצג עוד
-        </Button>
-      ) : null}
+        {listings?.length > 0 ? (
+          <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>
+            הצג עוד
+          </Button>
+        ) : null}
+    </VStack>
     </Container>
   );
 };
