@@ -64,7 +64,7 @@ const Listings = () => {
                 </Center>
                 <VStack spacing={4}>
                     <Link href="/postListing" passHref>
-                        <Button variant={"link"} colorScheme="green">
+                        <Button variant={"solid"} colorScheme="green">
                         לפרסום מודעה חדשה
                         </Button>
                     </Link>
