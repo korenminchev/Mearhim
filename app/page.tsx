@@ -25,6 +25,7 @@ const Listings = () => {
   const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
   const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
   const [search, setSearch] = useState<string>("");
+  const [postsLimit, setPostsLimit] = useState<number>(100);
 
   function filterListings(listings: Array<Listing>, search: string) {
     // Sort descending by id
@@ -115,12 +116,21 @@ const Listings = () => {
             <ListingCard listing={listing} backgroungColor={"green.100"} />
           </GridItem>
         ))}
-        {filteredListings.map((listing) => (
-          <GridItem key={listing.id}>
-            <ListingCard listing={listing} />
-          </GridItem>
-        ))}
+        {filteredListings.map((listing, index) => {
+          if (index >= postsLimit) return;
+
+          return (
+            <GridItem key={listing.id}>
+              <ListingCard listing={listing} />
+            </GridItem>
+          );
+        })}
       </Grid>
+      {listings?.length > 0 ? (
+        <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>
+          הצג עוד
+        </Button>
+      ) : null}
     </Container>
   );
 };
