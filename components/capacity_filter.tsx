@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Text, HStack } from '@chakra-ui/react';
+import { Box, Button, Text, HStack, Center } from '@chakra-ui/react';
 
 interface CapacityFilterProps {
     capacity: number;
@@ -23,18 +23,20 @@ const CapacityFilter: React.FC<CapacityFilterProps> = ({ capacity, onFilterChang
   }
 
     return (
-        <Box>
-            <Text mb={2} textAlign={'center'}>קיבולת מינימלית:</Text>
-            <HStack>
-                <Button onClick={(e) => decreaseCapacity(capacity)} size="sm" isDisabled={capacity === 1}>
-                    -
-                </Button>
-                <Text>{capacity >= 10 ? "10+" : capacity}</Text>
-                <Button onClick={(e) => increaseCapacity(capacity)} size="sm" isDisabled={capacity >= 10}>
-                    +
-                </Button>
-            </HStack>
-        </Box>
+      <Box>
+        <Text mb={2} textAlign={'center'}> מס׳ מתארחים מינימלי:</Text>
+        <Center>
+          <HStack>
+            <Button onClick={(e) => decreaseCapacity(capacity)} size="sm" isDisabled={capacity === 1}>
+                -
+            </Button>
+            <Text>{capacity >= 10 ? "10+" : capacity}</Text>
+            <Button onClick={(e) => increaseCapacity(capacity)} size="sm" isDisabled={capacity >= 10}>
+                +
+            </Button>
+          </HStack>
+        </Center>
+      </Box>
     );
 };
 
