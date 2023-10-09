@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { Box, Button, Center, FormControl, FormLabel, Input, Textarea, VStack } from '@chakra-ui/react';
+import { Button, Center, FormControl, FormLabel, Input, Textarea, VStack } from '@chakra-ui/react';
+import ReCAPTCHA from "react-google-recaptcha";
+
 import supabase from '../utils/supabaseClient';
 import { useRouter } from 'next/navigation';
 
@@ -12,8 +14,26 @@ const CreateListing = () => {
     const [city, setCity] = useState('');
     const [capacity, setCapacity] = useState(0);
     const [description, setDescription] = useState('');
+    const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
 
     const handleSubmit = async () => {
+        // Check that we have
+        if (!recaptchaValue) {
+            return;
+        }
+
+        const response = await fetch('/api/verifyRecaptcha', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recaptchaValue })
+        });
+    
+        const recaptchaData = await response.json();
+        if (!recaptchaData.success) {
+            alert('האימות נכשל, אנא נסה שנית');
+            return;
+        }
+
         setName(name.trim());
         setPhone(phone.trim());
         setCity(city.trim());
@@ -45,6 +65,8 @@ const CreateListing = () => {
         }
     };
 
+    const isProduction = () => process.env.NODE_ENV == 'production';
+
     return (
         <Center>
         <VStack w={"80%"} spacing={4} align="center" mt={10}>
@@ -67,6 +89,16 @@ const CreateListing = () => {
             <FormControl>
                 <FormLabel>תיאור (לא חובה)</FormLabel>
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+            </FormControl>
+            <FormControl>
+                <ReCAPTCHA
+                    sitekey={
+                        isProduction()
+                            ? "6LfiMogoAAAAAFGBG41bantHXAyd1na7djaCKOq3"
+                            : "6LdKMYgoAAAAAH6HODGNisHXCycU2fMcagTJq_cp"
+                    }
+                    onChange={value => setRecaptchaValue(value)}
+                />
             </FormControl>
             <Button mt={4} onClick={handleSubmit}>
                 פרסם מודעה

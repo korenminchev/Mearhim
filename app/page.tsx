@@ -8,8 +8,6 @@ import { ListingCard } from './listings/listingCard';
 import Link from 'next/link';
 import ReadMoreComponent from '@/components/read_more_component';
 
-
-
 const Listings = () => {
     const [listings, setListings] = useState<Array<Listing>>([]);
     const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
@@ -66,7 +64,7 @@ const Listings = () => {
                 </Center>
                 <VStack spacing={4}>
                     <Link href="/postListing" passHref>
-                        <Button variant={"link"} colorScheme="green">
+                        <Button variant={"solid"} colorScheme="green">
                         לפרסום מודעה חדשה
                         </Button>
                     </Link>
