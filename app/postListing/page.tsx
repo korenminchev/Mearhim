@@ -16,6 +16,8 @@ const CreateListing = () => {
     const [description, setDescription] = useState('');
     const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
 
+    const isValid = () => !(name == "" || phone == "" || city == "");
+
     const handleSubmit = async () => {
         // Check that we have
         if (!recaptchaValue) {
@@ -39,7 +41,7 @@ const CreateListing = () => {
         setCity(city.trim());
         setDescription(description.trim());
 
-        if (name == "" || phone == "" || city == "") {
+        if (!isValid()) {
             alert('אנא מלא/י את כל הפרטים');
             return;
         }
@@ -84,7 +86,7 @@ const CreateListing = () => {
             </FormControl>
             <FormControl isRequired={true}>
                 <FormLabel>כמות אנשים מקסימלית לאירוח</FormLabel>
-                <Input type="number" value={capacity} onChange={(e) => setCapacity(parseInt(e.target.value))} />
+                <Input type="number" value={capacity == 0 ? "" : capacity} onChange={(e) => setCapacity(parseInt(e.target.value))} />
             </FormControl>
             <FormControl>
                 <FormLabel>תיאור (לא חובה)</FormLabel>
@@ -100,7 +102,7 @@ const CreateListing = () => {
                     onChange={value => setRecaptchaValue(value)}
                 />
             </FormControl>
-            <Button mt={4} onClick={handleSubmit}>
+            <Button mt={4} onClick={handleSubmit} isDisabled={!isValid()}>
                 פרסם מודעה
             </Button>
         </VStack>
