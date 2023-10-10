@@ -6,21 +6,18 @@ import {
   Center,
   Container,
   Divider,
-  Flex,
-  Grid,
-  GridItem,
   Heading,
   Input,
   VStack,
-  list,
 } from "@chakra-ui/react";
-import { use, useEffect, useRef, useState } from "react";
-import supabase from "./utils/supabaseClient";
-import { Listing } from "./listings/listing";
-import { ListingCard } from "./listings/listingCard";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import ReadMoreComponent from "@/components/read_more_component";
-import CapacityFilter from "@/components/capacity_filter";
+
+import ReadMoreComponent from "@/src/app/components/read_more_component";
+import CapacityFilter from "@/src/app/components/capacity_filter";
+import { ListingCard } from "@/src/app/components/listing_card";
+import { fetchListings } from "@/src/app/utils/api";
+import { Listing } from "@/src/common/models/listing";
 
 const Listings = () => {
   const count = useRef(0);
@@ -50,7 +47,7 @@ const Listings = () => {
   }
 
   useEffect(() => {
-    fetchListings();
+    getListings();
   }, []);
 
   useEffect(() => {
@@ -63,34 +60,17 @@ const Listings = () => {
     setFilteredListings(filteredListings);
   }, [capacityFilter]);
 
-  const fetchListings = async () => {
-    if (count.current > 0) return;
-    count.current++;
-    const DB_LIMIT = 1000;
-    let page = 0;
-    
-    while (hasMore) {
-      const { data, error } = await supabase
-      .from("listings")
-      .select("*")
-      .eq("active", true)
-      .limit(1000)
-      .range(page * DB_LIMIT, (page + 1) * DB_LIMIT - 1);
-      
-      if (data && data.length > 0) {
-        console.log("Fetching listings");
-        setListings([...listings, ...data]);
-        setFilteredListings(filterListings(data, search));
-
-        page = page + 1;
-        console.log(page);
-        
-        if (data.length < DB_LIMIT) {
-          setHasMore(false);
-        }
-      }
-    }
-    
+  const getListings = async () => {
+    fetchListings()
+      .catch((error) => {
+        setListings([]);
+        setFilteredListings([]);
+      })
+      .then((response) => {
+        if (!response) return;
+        setListings(response);
+        setFilteredListings(filterListings(response, search));
+      });
   };
 
   return (
@@ -140,29 +120,34 @@ const Listings = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <CapacityFilter capacity={capacityFilter} onFilterChange={setCapacityFilter} />
+          <CapacityFilter
+            capacity={capacityFilter}
+            onFilterChange={setCapacityFilter}
+          />
           <Divider />
         </VStack>
       </Box>
-      <VStack spacing={2} w={'95%'}>
+      <VStack spacing={2} w={"95%"}>
         {pinnedListings.map((listing) => {
           return (
-              <ListingCard key={listing.id} listing={listing} backgroungColor="green.100"/>
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              backgroungColor="green.100"
+            />
           );
         })}
         {filteredListings.map((listing, index) => {
           if (index >= postsLimit) return;
 
-          return (
-              <ListingCard key={listing.id} listing={listing} />
-          );
+          return <ListingCard key={listing.id} listing={listing} />;
         })}
         {listings?.length > 0 ? (
           <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>
             הצג עוד
           </Button>
         ) : null}
-    </VStack>
+      </VStack>
     </Container>
   );
 };

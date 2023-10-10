@@ -1,4 +1,4 @@
-import { Providers } from "@/app/utils/providers/providers";
+import { Providers } from "@/src/app/utils/providers/providers";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "אתר ״מארחים״",

@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Button, Center, FormControl, FormLabel, Input, Textarea, VStack } from '@chakra-ui/react';
 import ReCAPTCHA from "react-google-recaptcha";
 
-import supabase from '../utils/supabaseClient';
 import { useRouter } from 'next/navigation';
+
+import { createListing } from "@/src/app/utils/api";
+import { Listing } from "@/src/common/models/listing";
 
 const CreateListing = () => {
     const router = useRouter();
@@ -46,25 +48,21 @@ const CreateListing = () => {
             return;
         }
 
-        const { data, error } = await supabase
-            .from('listings')
-            .insert([
-                {
-                    name,
-                    phone,
-                    city,
-                    capacity,
-                    description
-                }
-            ]);
+        const listing = {
+            name: name,
+            phone: phone,
+            city: city,
+            capacity: capacity,
+            description: description
+        } as Listing;
 
-        if (!error) {
+        createListing(listing).catch((error) => {
+            alert(`שגיאה: ${error?.message || 'Unknown error'}`);
+        }).then((response) => {
+            if (!response) return;
             alert('המודעה נוצרה בהצלחה, אנו מודים לך על העזרה 🙏❤️');
             router.push('/');
-            // Reset form or redirect as needed
-        } else {
-            alert(`שגיאה: ${error?.message || 'Unknown error'}`);
-        }
+        });
     };
 
     const isProduction = () => process.env.NODE_ENV == 'production';

@@ -7,7 +7,6 @@ const verifyRecaptcha = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const recaptchaValue = req.body.recaptchaValue;
   const SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
-  console.log(SECRET_KEY);
 
   if (!SECRET_KEY) {
     return res
@@ -25,7 +24,6 @@ const verifyRecaptcha = async (req: NextApiRequest, res: NextApiResponse) => {
   );
 
   const data = await response.json();
-  console.log(data);
 
   if (data.success) {
     res.status(200).json({ success: true });
