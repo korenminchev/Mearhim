@@ -1,12 +1,22 @@
+import { listingPageSize } from "@/src/common/constants";
 import { Listing } from "../../common/models/listing";
 import supabase from "./supabase/client";
 
 // A function to fetch all listings from the database.
-export const fetchListings = async () => {
+export const fetchListings = async (
+  page: number,
+  capacity: number,
+  city: string
+) => {
   const { data, error } = await supabase
     .from("listings")
     .select("*")
-    .eq("active", true);
+    .eq("active", true)
+    .gte("capacity", capacity)
+    .ilike("city", `%${city}%`)
+    .order("pinned", { ascending: false })
+    .order("created_at", { ascending: false })
+    .range(page * listingPageSize, (page + 1) * listingPageSize - 1);
 
   if (error) {
     throw error;

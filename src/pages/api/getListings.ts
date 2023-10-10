@@ -21,7 +21,12 @@ export default async function handler(
     });
   }
 
-  const listings = await fetchListings().catch((error) => {
+  // convert req.query.page to number
+  const page = Number(req.query.page) || 0;
+  const capacity = Number(req.query.capacity) || 0;
+  const city = String(req.query.city) || "";
+
+  const listings = await fetchListings(page, capacity, city).catch((error) => {
     console.log(error);
   });
 

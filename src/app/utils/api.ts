@@ -5,10 +5,17 @@ import { Listing, isModelValidListing } from "@/src/common/models/listing";
 // An API wrapper that fetches all of the listings from the backend
 // and returns them as an array of Listing objects.
 // API ROUTE: GET /api/getListings
-export async function fetchListings(): Promise<Array<Listing>> {
-  const response = await fetch("/api/getListings", {
-    method: "GET",
-  });
+export async function fetchListings(
+  page: number,
+  minimumCapacity: number,
+  city: string
+): Promise<Array<Listing>> {
+  const response = await fetch(
+    `/api/getListings?page=${page}&capacity=${minimumCapacity}&city=${city}`,
+    {
+      method: "GET",
+    }
+  );
 
   const data = await response.json();
   if (!data.success) {

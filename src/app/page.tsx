@@ -8,9 +8,10 @@ import {
   Divider,
   Heading,
   Input,
+  Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 import ReadMoreComponent from "@/src/app/components/read_more_component";
@@ -18,59 +19,71 @@ import CapacityFilter from "@/src/app/components/capacity_filter";
 import { ListingCard } from "@/src/app/components/listing_card";
 import { fetchListings } from "@/src/app/utils/api";
 import { Listing } from "@/src/common/models/listing";
+import _, { random } from "lodash";
+import { listingPageSize } from "@/src/common/constants";
 
 const Listings = () => {
-  const count = useRef(0);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [realTimeCitySearch, setRealTimeCitySearch] = useState<string>(""); // <-- New state for immediate feedback
+  const [citySearch, setCitySearch] = useState<string>("");
+  const debouncedCitySearch = useCallback(
+    _.debounce((value: string) => setCitySearch(value), 300),
+    []
+  );
+
+  const [realTimeCapacityFilter, setRealTimeCapacityFilter] =
+    useState<number>(2); // <-- New state for immediate feedback
+  const [capacityFilter, setCapacityFilter] = useState<number>(2);
+  const debouncedCapacityFilter = useCallback(
+    _.debounce((value: number) => setCapacityFilter(value), 300),
+    []
+  );
+
   const [page, setPage] = useState<number>(0);
   const [listings, setListings] = useState<Array<Listing>>([]);
-  const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
-  const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
-  const [search, setSearch] = useState<string>("");
-  const [postsLimit, setPostsLimit] = useState<number>(100);
-  const [capacityFilter, setCapacityFilter] = useState<number>(2);
-
-  function filterListings(listings: Array<Listing>, search: string) {
-    // Sort descending by id
-    listings.sort((a, b) => b.id - a.id);
-
-    // Set pinned listings
-    setPinnedListings(listings.filter((listing) => listing.pinned));
-    listings = listings.filter((listing) => !listing.pinned);
-
-    listings = listings.filter((listing) => listing.capacity >= capacityFilter);
-
-    if (!search || search.length == 0) return listings;
-    return listings.filter((listing) =>
-      listing.city.toLowerCase().startsWith(search.toLowerCase())
-    );
-  }
+  const [isFetching, setIsFetching] = useState(false);
+  const [showMoreButton, setShowMoreButton] = useState<boolean>(true);
 
   useEffect(() => {
-    getListings();
-  }, []);
+    if (isFetching) return;
+
+    // Clear the current listings, we are using new filters.
+    setShowMoreButton(true);
+
+    // Fetching with page 0 when filters change
+    if (page !== 0) {
+      setPage(0);
+    } else {
+      getListings(0, capacityFilter, citySearch);
+    }
+  }, [citySearch, capacityFilter]);
 
   useEffect(() => {
-    const filteredListings = filterListings(listings, search);
-    setFilteredListings(filteredListings);
-  }, [search]);
+    if (isFetching) return;
 
-  useEffect(() => {
-    const filteredListings = filterListings(listings, search);
-    setFilteredListings(filteredListings);
-  }, [capacityFilter]);
+    getListings(page, capacityFilter, citySearch);
+  }, [page]);
 
-  const getListings = async () => {
-    fetchListings()
-      .catch((error) => {
+  const getListings = async (pg: number, capacity: number, city: string) => {
+    setIsFetching(true);
+    try {
+      if (pg === 0) {
         setListings([]);
-        setFilteredListings([]);
-      })
-      .then((response) => {
-        if (!response) return;
-        setListings(response);
-        setFilteredListings(filterListings(response, search));
-      });
+      }
+
+      const response = await fetchListings(pg, capacity, city);
+      if (response) {
+        setListings((prevListings) => prevListings.concat(response));
+      }
+
+      if (response.length < listingPageSize) {
+        console.log(response);
+        setShowMoreButton(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetching(false);
+    }
   };
 
   return (
@@ -117,33 +130,40 @@ const Listings = () => {
           </Link>
           <Input
             placeholder="חיפוש לפי עיר"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={realTimeCitySearch}
+            onChange={(e) => {
+              setRealTimeCitySearch(e.target.value); // <-- Immediate feedback
+              debouncedCitySearch(e.target.value); // <-- Debounced action
+            }}
           />
           <CapacityFilter
-            capacity={capacityFilter}
-            onFilterChange={setCapacityFilter}
+            capacity={realTimeCapacityFilter}
+            onFilterChange={(value) => {
+              setRealTimeCapacityFilter(value); // <-- Immediate feedback
+              debouncedCapacityFilter(value); // <-- Debounced action
+            }}
           />
           <Divider />
         </VStack>
       </Box>
       <VStack spacing={2} w={"95%"}>
-        {pinnedListings.map((listing) => {
+        <Box>
+          <Text fontSize="me" mb={4} textAlign={"center"}>
+            <b>מספר המודעות המוצגות: {listings.length}</b>
+          </Text>
+        </Box>
+        {listings.map((listing) => {
           return (
             <ListingCard
-              key={listing.id}
+              key={random(0, 1000000)}
               listing={listing}
-              backgroungColor="green.100"
+              backgroungColor={listing.pinned ? "green.100" : undefined}
             />
           );
         })}
-        {filteredListings.map((listing, index) => {
-          if (index >= postsLimit) return;
 
-          return <ListingCard key={listing.id} listing={listing} />;
-        })}
-        {listings?.length > 0 ? (
-          <Button m={4} onClick={(e) => setPostsLimit(postsLimit + 50)}>
+        {showMoreButton ? (
+          <Button m={4} onClick={(e) => setPage(page + 1)}>
             הצג עוד
           </Button>
         ) : null}
