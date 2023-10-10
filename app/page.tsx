@@ -14,7 +14,7 @@ import {
   VStack,
   list,
 } from "@chakra-ui/react";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import supabase from "./utils/supabaseClient";
 import { Listing } from "./listings/listing";
 import { ListingCard } from "./listings/listingCard";
@@ -23,6 +23,9 @@ import ReadMoreComponent from "@/components/read_more_component";
 import CapacityFilter from "@/components/capacity_filter";
 
 const Listings = () => {
+  const count = useRef(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(0);
   const [listings, setListings] = useState<Array<Listing>>([]);
   const [filteredListings, setFilteredListings] = useState<Array<Listing>>([]);
   const [pinnedListings, setPinnedListings] = useState<Array<Listing>>([]);
@@ -61,14 +64,33 @@ const Listings = () => {
   }, [capacityFilter]);
 
   const fetchListings = async () => {
-    const { data, error } = await supabase
+    if (count.current > 0) return;
+    count.current++;
+    const DB_LIMIT = 1000;
+    let page = 0;
+    
+    while (hasMore) {
+      const { data, error } = await supabase
       .from("listings")
       .select("*")
-      .eq("active", true);
-    if (data) {
-      setListings(data);
-      setFilteredListings(filterListings(data, search));
+      .eq("active", true)
+      .limit(1000)
+      .range(page * DB_LIMIT, (page + 1) * DB_LIMIT - 1);
+      
+      if (data && data.length > 0) {
+        console.log("Fetching listings");
+        setListings([...listings, ...data]);
+        setFilteredListings(filterListings(data, search));
+
+        page = page + 1;
+        console.log(page);
+        
+        if (data.length < DB_LIMIT) {
+          setHasMore(false);
+        }
+      }
     }
+    
   };
 
   return (
