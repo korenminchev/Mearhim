@@ -159,7 +159,7 @@ const Listings = () => {
         {listings.map((listing) => {
           return (
             <ListingCard
-              key={random(0, 1000000)}
+              key={listing.id}
               listing={listing}
               backgroungColor={listing.pinned ? "green.100" : undefined}
             />
