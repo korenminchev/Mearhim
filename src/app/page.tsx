@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import ReadMoreComponent from "@/src/app/components/read_more_component";
@@ -41,6 +41,7 @@ const Listings = () => {
   const [page, setPage] = useState<number>(0);
   const [listings, setListings] = useState<Array<Listing>>([]);
   const [isFetching, setIsFetching] = useState(false);
+  const fetching = useRef(false);
   const [showMoreButton, setShowMoreButton] = useState<boolean>(true);
 
   useEffect(() => {
@@ -64,6 +65,8 @@ const Listings = () => {
   }, [page]);
 
   const getListings = async (pg: number, capacity: number, city: string) => {
+    if (fetching.current) return;
+    fetching.current = true;
     setIsFetching(true);
     try {
       if (pg === 0) {
@@ -82,6 +85,7 @@ const Listings = () => {
     } catch (error) {
       console.error(error);
     } finally {
+      fetching.current = false;
       setIsFetching(false);
     }
   };
@@ -163,7 +167,7 @@ const Listings = () => {
         })}
 
         {showMoreButton ? (
-          <Button m={4} onClick={(e) => setPage(page + 1)}>
+          <Button m={4} onClick={(e) => setPage(page + 1)} isLoading={isFetching}>
             הצג עוד
           </Button>
         ) : null}
