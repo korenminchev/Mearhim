@@ -1,6 +1,7 @@
 "use client";
 
 import { Listing, isModelValidListing } from "@/src/common/models/listing";
+import { ProtectedSpaceType } from "@/src/common/models/protected_space";
 
 // An API wrapper that fetches all of the listings from the backend
 // and returns them as an array of Listing objects.
@@ -8,14 +9,38 @@ import { Listing, isModelValidListing } from "@/src/common/models/listing";
 export async function fetchListings(
   page: number,
   minimumCapacity: number,
-  city: string
+  city: string,
+  protectedSpace: ProtectedSpaceType[],
+  petsFriendly: boolean | null,
+  petsExisting: boolean | null,
+  disabledAccessibility: boolean | null,
+  kosher: boolean | null
 ): Promise<Array<Listing>> {
-  const response = await fetch(
-    `/api/getListings?page=${page}&capacity=${minimumCapacity}&city=${city}`,
-    {
-      method: "GET",
-    }
-  );
+  let url = `/api/getListings?page=${page}&capacity=${minimumCapacity}&city=${city}`;
+
+  for (const space of protectedSpace) {
+    url += `&protectedSpace=${space}`;
+  }
+
+  if (petsFriendly !== null) {
+    url += `&petsFriendly=${petsFriendly}`;
+  }
+
+  if (petsExisting !== null) {
+    url += `&petsExisting=${petsExisting}`;
+  }
+
+  if (disabledAccessibility !== null) {
+    url += `&disabledAccessibility=${disabledAccessibility}`;
+  }
+
+  if (kosher !== null) {
+    url += `&kosher=${kosher}`;
+  }
+
+  const response = await fetch(url, {
+    method: "GET",
+  });
 
   const data = await response.json();
   if (!data.success) {

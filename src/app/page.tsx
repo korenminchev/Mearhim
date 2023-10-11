@@ -6,6 +6,7 @@ import {
   Center,
   Container,
   Divider,
+  HStack,
   Heading,
   Input,
   Text,
@@ -13,28 +14,78 @@ import {
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import _ from "lodash";
 
 import ReadMoreComponent from "@/src/app/components/read_more_component";
 import CapacityFilter from "@/src/app/components/capacity_filter";
 import { ListingCard } from "@/src/app/components/listing_card";
 import { fetchListings } from "@/src/app/utils/api";
 import { Listing } from "@/src/common/models/listing";
-import _, { random } from "lodash";
 import { listingPageSize } from "@/src/common/constants";
+import CollapsibleWidget from "@/src/app/components/collapsible_widget";
+import ProtectedSpaceFilter, {
+  ProtectedSpaceOption,
+} from "@/src/app/components/protected_space_filter";
+import NullableBooleanFilter from "@/src/app/components/nullable_boolean_filter";
+import { ProtectedSpaceType } from "@/src/common/models/protected_space";
 
 const Listings = () => {
-  const [realTimeCitySearch, setRealTimeCitySearch] = useState<string>(""); // <-- New state for immediate feedback
+  const [realTimeCitySearch, setRealTimeCitySearch] = useState<string>("");
   const [citySearch, setCitySearch] = useState<string>("");
   const debouncedCitySearch = useCallback(
     _.debounce((value: string) => setCitySearch(value), 300),
     []
   );
 
-  const [realTimeCapacityFilter, setRealTimeCapacityFilter] =
-    useState<number>(2); // <-- New state for immediate feedback
+  const [realTimeCapacityFilter, setRealTimeCapacityFilter] = useState<number>(2);
   const [capacityFilter, setCapacityFilter] = useState<number>(2);
   const debouncedCapacityFilter = useCallback(
     _.debounce((value: number) => setCapacityFilter(value), 300),
+    []
+  );
+
+  const [realTimeProtectedSpaceFilter, setRealTimeProtectedSpaceFilter] = useState<
+    ProtectedSpaceOption[]
+  >([]);
+  const [protectedSpaceFilter, setProtectedSpaceFilter] = useState<ProtectedSpaceOption[]>([]);
+  const debouncedProtectedSpaceFilter = useCallback(
+    _.debounce((value: ProtectedSpaceOption[]) => setProtectedSpaceFilter(value), 300),
+    []
+  );
+
+  const [realTimePetsFriendlyFilter, setRealTimePetsFriendlyFilter] = useState<boolean | null>(
+    null
+  );
+  const [petsFriendlyFilter, setPetsFriendlyFilter] = useState<boolean | null>(null);
+  const debouncedPetsFriendlyFilter = useCallback(
+    _.debounce((value: boolean | null) => setPetsFriendlyFilter(value), 300),
+    []
+  );
+
+  const [realTimePetsExistingFilter, setRealTimePetsExistingFilter] = useState<boolean | null>(
+    null
+  );
+  const [petsExistingFilter, setPetsExistingFilter] = useState<boolean | null>(null);
+  const debouncedPetsExistingFilter = useCallback(
+    _.debounce((value: boolean | null) => setPetsExistingFilter(value), 300),
+    []
+  );
+
+  const [realTimeDisabledAccessibilityFilter, setRealTimeDisabledAccessibilityFilter] = useState<
+    boolean | null
+  >(null);
+  const [disabledAccessibilityFilter, setDisabledAccessibilityFilter] = useState<boolean | null>(
+    null
+  );
+  const debouncedDisabledAccessibilityFilter = useCallback(
+    _.debounce((value: boolean | null) => setDisabledAccessibilityFilter(value), 300),
+    []
+  );
+
+  const [realTimeKosherFilter, setRealTimeKosherFilter] = useState<boolean | null>(null);
+  const [kosherFilter, setKosherFilter] = useState<boolean | null>(null);
+  const debouncedKosherFilter = useCallback(
+    _.debounce((value: boolean | null) => setKosherFilter(value), 300),
     []
   );
 
@@ -54,17 +105,52 @@ const Listings = () => {
     if (page !== 0) {
       setPage(0);
     } else {
-      getListings(0, capacityFilter, citySearch);
+      getListings(
+        0,
+        capacityFilter,
+        citySearch,
+        protectedSpaceFilter.map((value) => value.value),
+        petsFriendlyFilter,
+        petsExistingFilter,
+        disabledAccessibilityFilter,
+        kosherFilter
+      );
     }
-  }, [citySearch, capacityFilter]);
+  }, [
+    citySearch,
+    capacityFilter,
+    protectedSpaceFilter,
+    petsFriendlyFilter,
+    petsExistingFilter,
+    disabledAccessibilityFilter,
+    kosherFilter,
+  ]);
 
   useEffect(() => {
     if (isFetching) return;
 
-    getListings(page, capacityFilter, citySearch);
+    getListings(
+      page,
+      capacityFilter,
+      citySearch,
+      protectedSpaceFilter.map((value) => value.value),
+      petsFriendlyFilter,
+      petsExistingFilter,
+      disabledAccessibilityFilter,
+      kosherFilter
+    );
   }, [page]);
 
-  const getListings = async (pg: number, capacity: number, city: string) => {
+  const getListings = async (
+    pg: number,
+    capacity: number,
+    city: string,
+    protectedSpaces: ProtectedSpaceType[],
+    petsFriendly: boolean | null,
+    petsExisting: boolean | null,
+    disabledAccessibility: boolean | null,
+    kosher: boolean | null
+  ) => {
     if (fetching.current) return;
     fetching.current = true;
     setIsFetching(true);
@@ -73,7 +159,16 @@ const Listings = () => {
         setListings([]);
       }
 
-      const response = await fetchListings(pg, capacity, city);
+      const response = await fetchListings(
+        pg,
+        capacity,
+        city,
+        protectedSpaces,
+        petsFriendly,
+        petsExisting,
+        disabledAccessibility,
+        kosher
+      );
       if (response) {
         setListings((prevListings) => prevListings.concat(response));
       }
@@ -91,71 +186,166 @@ const Listings = () => {
   };
 
   return (
-    <Container
-      py="40px"
-      maxW={"container.xl"}
-      centerContent
-      as="main"
-      maxH="100vh"
-    >
-      <Box pb={5}>
+    <Container py="40px" maxW={"fit-content"} centerContent as="main" maxH="100vh" w="100%">
+      <Box pb={5} maxW={"fit-content"} w="100%">
         <Center>
-          <Heading mb={4}>אתר &quot;מארחים&quot;</Heading>
+          <Heading mb={4}>🏠 אתר &quot;מארחים&quot; 🏠</Heading>
         </Center>
         <Center>
           <ReadMoreComponent
-            content={`
-במטרה להקל על התושבים ולהעניק להם קצת שקט, החלטנו להקים אתר בו תוכלו למצוא מידע על משפחות מארחות שמוכנות לפתוח את דלתות בתיהם בלב רחב. זאת על מנת לאפשר למי שמעוניין להתארח או לברוח מהבלאגן באופן זמני.
+            content={`במטרה להקל על התושבים ולהעניק להם קצת שקט, החלטנו להקים אתר בו תוכלו למצוא מידע על משפחות מארחות שמוכנות לפתוח את דלתות בתיהם בלב רחב. זאת על מנת לאפשר למי שמעוניין להתארח או לברוח מהבלאגן באופן זמני.
 בהתאם להתפשטות המצב הביטחוני והרקטות המתמשכות בדרום הארץ, אנו פונים אל הקהל הרחב לתמיכה וסיוע לתושבי הדרום בימים הקשים אלה.
-אנו ממליצים ומבקשים מכלל הציבור לשתף את ההודעה ולהעבירה הלאה כמה שיותר, כדי להפיק מקסימום תועלת מהאתר ומהמיזם, ובכך לאפשר למספר הגדול ביותר של משפחות למצוא מקום מוגן וחם בו יוכלו להתארח.
-                        `}
+אנו ממליצים ומבקשים מכלל הציבור לשתף את ההודעה ולהעבירה הלאה כמה שיותר, כדי להפיק מקסימום תועלת מהאתר ומהמיזם, ובכך לאפשר למספר הגדול ביותר של משפחות למצוא מקום מוגן וחם בו יוכלו להתארח.`}
             limit={150}
           ></ReadMoreComponent>
         </Center>
-        <VStack spacing={4}>
+        <VStack w="100%">
           <Link href="/postListing" passHref>
-            <Button variant={"solid"} colorScheme="green">
+            <Button variant={"solid"} colorScheme="green" size={"sm"}>
               לפרסום מודעה חדשה
             </Button>
           </Link>
+
           <Link
             href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..."
             target="_blank"
             passHref
           >
-            <Button variant={"link"} colorScheme="red">
+            <Button variant={"solid"} colorScheme="red" size={"sm"}>
               לעריכת/הסרת מודעה קיימת
             </Button>
           </Link>
+
           <Link href="https://wa.me/+972548816044" target="_blank" passHref>
-            <Button variant={"link"} colorScheme="teal">
+            <Button variant={"solid"} colorScheme="blue" size={"sm"}>
               למידע נוסף ושאלות
             </Button>
           </Link>
+
+          <Divider margin={4} />
+
+          <Center>
+            <Heading size={"md"} mt={1} mb={2}>
+              🔍 סינון וחיפוש
+            </Heading>
+          </Center>
+
           <Input
-            placeholder="חיפוש לפי עיר"
+            placeholder="חיפוש לפי ישוב"
             value={realTimeCitySearch}
+            size={"sm"}
+            mb={1}
             onChange={(e) => {
               setRealTimeCitySearch(e.target.value); // <-- Immediate feedback
               debouncedCitySearch(e.target.value); // <-- Debounced action
             }}
           />
-          <CapacityFilter
-            capacity={realTimeCapacityFilter}
-            onFilterChange={(value) => {
-              setRealTimeCapacityFilter(value); // <-- Immediate feedback
-              debouncedCapacityFilter(value); // <-- Debounced action
-            }}
-          />
+
+          <Center w="100%">
+            <CollapsibleWidget
+              options={{
+                border: "1px",
+                borderRadius: "4",
+                borderColor: "gray.100",
+              }}
+              buttonProps={{
+                collapsedOnCaption: "הצג סננים נוספים",
+                collapsedOffCaption: "הסתר סננים נוספים",
+                props: {
+                  textStyle: { fontWeight: "bold" },
+                  colorScheme: "gray",
+                  variant: "solid",
+                  size: "sm",
+                },
+              }}
+            >
+              <CapacityFilter
+                capacity={realTimeCapacityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeCapacityFilter(value); // <-- Immediate feedback
+                  debouncedCapacityFilter(value); // <-- Debounced action
+                }}
+              />
+
+              <ProtectedSpaceFilter
+                onFilterChange={(values) => {
+                  const data = values.map((value) => value);
+                  setRealTimeProtectedSpaceFilter(data);
+                  debouncedProtectedSpaceFilter(data);
+                }}
+                props={{
+                  mt: 5,
+                }}
+                protectedSpaces={protectedSpaceFilter}
+              />
+
+              <NullableBooleanFilter
+                label="♿️ נגישות לנכים"
+                value={realTimeDisabledAccessibilityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeDisabledAccessibilityFilter(value);
+                  debouncedDisabledAccessibilityFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+
+              <NullableBooleanFilter
+                label="🐶 האם אפשר להביא בע״ח"
+                value={realTimePetsFriendlyFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsFriendlyFilter(value);
+                  debouncedPetsFriendlyFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+
+              <NullableBooleanFilter
+                label="🐶 האם יש בע״ח בדירה"
+                value={realTimePetsExistingFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsExistingFilter(value);
+                  debouncedPetsExistingFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+
+              <NullableBooleanFilter
+                label="🍴 כשר"
+                value={realTimeKosherFilter}
+                onFilterChange={(value) => {
+                  console.log("value=", value);
+                  setRealTimeKosherFilter(value);
+                  debouncedKosherFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+            </CollapsibleWidget>
+          </Center>
           <Divider />
         </VStack>
       </Box>
+
       <VStack spacing={2} w={"95%"}>
+        <Center>
+          <Heading size={"md"} mt={1} mb={2}>
+            📊 תוצאות
+          </Heading>
+        </Center>
+
         <Box>
           <Text fontSize="me" mb={4} textAlign={"center"}>
             <b>מספר המודעות המוצגות: {listings.length}</b>
           </Text>
         </Box>
+
         {listings.map((listing) => {
           return (
             <ListingCard
