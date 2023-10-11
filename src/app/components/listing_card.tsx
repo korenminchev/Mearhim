@@ -2,8 +2,8 @@
 
 import { Box, Heading, Text, Icon, Flex, Link, Spacer } from '@chakra-ui/react';
 import { PhoneIcon, AtSignIcon, TimeIcon } from '@chakra-ui/icons';
-import { Listing } from './listing';
-import ReadMoreComponent from '@/components/read_more_component';
+import { Listing } from '../../common/models/listing';
+import ReadMoreComponent from '@/src/app/components/read_more_component';
 
 type ListingCardProps = {
     listing: Listing;
