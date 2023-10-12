@@ -23,7 +23,7 @@ const CapacityFilter: React.FC<CapacityFilterProps> = ({ capacity, onFilterChang
 
   return (
     <Box>
-      <Text mb={2} textAlign={"center"}>
+      <Text mt={4} mb={2} textAlign={"center"}>
         {" "}
         <b>🧑‍🤝‍🧑 מס׳ מתארחים מינימלי:</b>
       </Text>

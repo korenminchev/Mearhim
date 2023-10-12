@@ -34,7 +34,7 @@ const ProtectedSpaceFilter: React.FC<ProtectedPlaceFilterProps> = ({
     <Box {...props}>
       <Text mb={2} textAlign={"center"}>
         {" "}
-        <b>🚨 מקום מוגן:</b>
+        <b>🚨 מרחב מוגן:</b>
       </Text>
 
       <Select isMulti={true} name="protectedSpace" options={options} onChange={onFilterChange} />
