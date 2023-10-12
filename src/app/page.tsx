@@ -205,7 +205,6 @@ const Listings = () => {
               לפרסום מודעה חדשה
             </Button>
           </Link>
-
           <Link
             href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..."
             target="_blank"
@@ -215,32 +214,26 @@ const Listings = () => {
               לעריכת/הסרת מודעה קיימת
             </Button>
           </Link>
-
           <Link href="https://wa.me/+972548816044" target="_blank" passHref>
             <Button variant={"solid"} colorScheme="blue" size={"sm"}>
               למידע נוסף ושאלות
             </Button>
           </Link>
-
           <Divider margin={4} />
-
           <Center>
             <Heading size={"md"} mt={1} mb={2}>
               🔍 סינון וחיפוש
             </Heading>
           </Center>
-
           <Input
             placeholder="חיפוש לפי ישוב"
             value={realTimeCitySearch}
             size={"sm"}
-            mb={1}
             onChange={(e) => {
               setRealTimeCitySearch(e.target.value); // <-- Immediate feedback
               debouncedCitySearch(e.target.value); // <-- Debounced action
             }}
           />
-
           <CapacityFilter
             capacity={realTimeCapacityFilter}
             onFilterChange={(value) => {
@@ -249,95 +242,76 @@ const Listings = () => {
             }}
           />
 
+          <ProtectedSpaceFilter
+            onFilterChange={(values) => {
+              const data = values.map((value) => value);
+              setRealTimeProtectedSpaceFilter(data);
+              debouncedProtectedSpaceFilter(data);
+            }}
+            props={{
+              mt: 4,
+              w: "100%",
+            }}
+            protectedSpaces={protectedSpaceFilter}
+          />
+
+          <NullableBooleanFilter
+            label="🍴 כשר"
+            value={realTimeKosherFilter}
+            onFilterChange={(value) => {
+              console.log("value=", value);
+              setRealTimeKosherFilter(value);
+              debouncedKosherFilter(value);
+            }}
+            props={{
+              mt: 4,
+            }}
+          />
+
           {false && (
-            <Center w="100%">
-              <CollapsibleWidget
-                options={{
-                  border: "1px",
-                  borderRadius: "4",
-                  borderColor: "gray.100",
+            <div>
+              <NullableBooleanFilter
+                label="♿️ נגישות לנכים"
+                value={realTimeDisabledAccessibilityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeDisabledAccessibilityFilter(value);
+                  debouncedDisabledAccessibilityFilter(value);
                 }}
-                buttonProps={{
-                  collapsedOnCaption: "הצג סננים נוספים",
-                  collapsedOffCaption: "הסתר סננים נוספים",
-                  props: {
-                    textStyle: { fontWeight: "bold" },
-                    colorScheme: "gray",
-                    variant: "solid",
-                    size: "sm",
-                  },
+                props={{
+                  mt: 4,
                 }}
-              >
-                <ProtectedSpaceFilter
-                  onFilterChange={(values) => {
-                    const data = values.map((value) => value);
-                    setRealTimeProtectedSpaceFilter(data);
-                    debouncedProtectedSpaceFilter(data);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                  protectedSpaces={protectedSpaceFilter}
-                />
-
-                <NullableBooleanFilter
-                  label="♿️ נגישות לנכים"
-                  value={realTimeDisabledAccessibilityFilter}
-                  onFilterChange={(value) => {
-                    setRealTimeDisabledAccessibilityFilter(value);
-                    debouncedDisabledAccessibilityFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-
-                <NullableBooleanFilter
-                  label="🐶 האם אפשר להביא בע״ח"
-                  value={realTimePetsFriendlyFilter}
-                  onFilterChange={(value) => {
-                    setRealTimePetsFriendlyFilter(value);
-                    debouncedPetsFriendlyFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-
-                <NullableBooleanFilter
-                  label="🐶 האם יש בע״ח בדירה"
-                  value={realTimePetsExistingFilter}
-                  onFilterChange={(value) => {
-                    setRealTimePetsExistingFilter(value);
-                    debouncedPetsExistingFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-
-                <NullableBooleanFilter
-                  label="🍴 כשר"
-                  value={realTimeKosherFilter}
-                  onFilterChange={(value) => {
-                    console.log("value=", value);
-                    setRealTimeKosherFilter(value);
-                    debouncedKosherFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-              </CollapsibleWidget>
-            </Center>
+              />
+              <NullableBooleanFilter
+                label="🐶 האם אפשר להביא בע״ח"
+                value={realTimePetsFriendlyFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsFriendlyFilter(value);
+                  debouncedPetsFriendlyFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+              <NullableBooleanFilter
+                label="🐶 האם יש בע״ח בדירה"
+                value={realTimePetsExistingFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsExistingFilter(value);
+                  debouncedPetsExistingFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+            </div>
           )}
-          <Divider />
+          <Divider mt={2} />
         </VStack>
       </Box>
 
       <VStack spacing={2} w={"95%"}>
         <Center>
-          <Heading size={"md"} mt={1} mb={2}>
+          <Heading size={"md"} mb={2}>
             📊 תוצאות
           </Heading>
         </Center>
