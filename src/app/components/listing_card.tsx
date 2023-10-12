@@ -1,14 +1,14 @@
 "use client";
 
-import { Box, Heading, Text, Icon, Flex, Link, Spacer, Collapse } from "@chakra-ui/react";
-import { PhoneIcon, AtSignIcon, TimeIcon } from "@chakra-ui/icons";
-import { Listing } from "../../common/models/listing";
-import CollapsibleWidget from "@/src/app/components/collapsible_widget";
-import {
-  protectedSpaceTypeToHebrew,
-  protectedSpaceTypeToHebrewString,
-} from "@/src/common/models/protected_space";
-import { nullableBooleanToHebrewString } from "@/src/common/utils";
+import React, { useRef, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Box, Text, Icon, Flex, Link, Button } from "@chakra-ui/react";
+import { PhoneIcon } from "@chakra-ui/icons";
+
+import { Listing } from "@/src/common/models/listing";
+import { protectedSpaceTypeToHebrewString } from "@/src/common/models/protected_space";
+import { isProduction, nullableBooleanToHebrewString } from "@/src/common/utils";
+import { incrementPhoneClickedCounter } from "../utils/api";
 
 type ListingCardProps = {
   listing: Listing;
@@ -16,6 +16,33 @@ type ListingCardProps = {
 };
 
 export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungColor }) => {
+  const [showPhone, setShowPhone] = useState<boolean>(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  const onRecaptchaChange = async (value: string | null) => {
+    console.log("recaptcha value: ", value);
+    if (!value) {
+      return;
+    }
+
+    const response = await fetch("/api/verifyRecaptcha", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recaptchaValue: value, recaptchaType: "showPhone" }),
+    });
+
+    const recaptchaData = await response.json();
+    if (!recaptchaData.success) {
+      return;
+    }
+
+    setShowPhone(true);
+    try {
+      incrementPhoneClickedCounter(listing.id);
+    } catch {}
+    recaptchaRef.current?.reset();
+  };
+
   return (
     <Box
       w={"100%"}
@@ -67,12 +94,36 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
               <b>ℹ️ מידע נוסף:</b> {listing.description || "אין תיאור"}
             </Text>
           )}
-          <Flex align="center">
-            <Icon as={PhoneIcon} boxSize={5} marginLeft={2} paddingLeft={1} />
-            <Link href={`tel:${listing.phone}`} ml={2}>
-              {listing.phone}
-            </Link>
-          </Flex>
+
+          {showPhone ? (
+            <Flex align="center">
+              <Icon as={PhoneIcon} boxSize={5} marginLeft={2} paddingLeft={1} />
+              <Link href={`tel:${listing.phone}`} ml={2}>
+                {listing.phone}
+              </Link>
+            </Flex>
+          ) : (
+            <Button
+              size="sm"
+              colorScheme="gray"
+              onClick={() => {
+                recaptchaRef.current?.execute();
+              }}
+            >
+              הצג מספר
+            </Button>
+          )}
+
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={
+              isProduction()
+                ? "6LdhAZgoAAAAANy_4Vh8NLfDHy8VLJFcMXBeyDIi"
+                : "6LeRAJgoAAAAAOB5NmcfgPBrZ3hH6cyuDA78q3v6"
+            }
+            size="invisible"
+            onChange={onRecaptchaChange}
+          />
         </Box>
       </Flex>
     </Box>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Center,
@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { createListing } from "@/src/app/utils/api";
 import { Listing } from "@/src/common/models/listing";
 import { protectedSpaceTypeToHebrew } from "@/src/common/models/protected_space";
+import { isProduction } from "@/src/common/utils";
 
 const CreateListing = () => {
   const router = useRouter();
@@ -42,7 +43,6 @@ const CreateListing = () => {
   const isValid = () => !(name == "" || phone == "" || city == "");
 
   const handleSubmit = async () => {
-    // Check that we have
     if (!recaptchaValue) {
       return;
     }
@@ -50,7 +50,7 @@ const CreateListing = () => {
     const response = await fetch("/api/verifyRecaptcha", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recaptchaValue }),
+      body: JSON.stringify({ recaptchaValue, recaptchaType: "postListing" }),
     });
 
     const recaptchaData = await response.json();
@@ -92,8 +92,6 @@ const CreateListing = () => {
         router.push("/");
       });
   };
-
-  const isProduction = () => process.env.NODE_ENV == "production";
 
   return (
     <Container py="40px" maxW={"container.xl"} centerContent as="main" maxH="100vh">

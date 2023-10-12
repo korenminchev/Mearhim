@@ -1,7 +1,7 @@
 import { listingPageSize } from "@/src/common/constants";
-import { Listing } from "../../common/models/listing";
-import supabase from "./supabase/client";
+import { Listing } from "@/src/common/models/listing";
 import { ProtectedSpaceType } from "@/src/common/models/protected_space";
+import supabase from "./supabase/client";
 
 // A function to fetch all listings from the database.
 export const fetchListings = async (
@@ -101,5 +101,30 @@ export const createListing = async (listing: Listing) => {
   const { data, error } = await supabase.from("listings").insert([listing]);
   if (error) {
     throw error;
+  }
+};
+
+// A function to get a listing from the database by its id.
+export const getListing = async (id: string) => {
+  const { data, error } = await supabase.from("listings").select("*").eq("id", id).single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+// A function to increment the phoneClickedCounter field of a listing.
+export const incrementListingPhoneClickedCounter = async (id: number) => {
+  try {
+    const { data, error } = await supabase.rpc("increment_phone_counter", { listing_id: id });
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
   }
 };

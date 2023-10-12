@@ -6,22 +6,30 @@ const verifyRecaptcha = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   const recaptchaValue = req.body.recaptchaValue;
-  const SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+  const recaptchaType = req.body.recaptchaType;
 
-  if (!SECRET_KEY) {
-    return res
-      .status(500)
-      .json({ error: "RECAPTCHA_SECRET_KEY is not defined" });
+  const secretKeys: Record<string, string> = {
+    showPhone: process.env.RECAPTCHA_PHONE_SECRET_KEY as string,
+    postListing: process.env.RECAPTCHA_SECRET_KEY as string,
+  };
+
+  var SECRET_KEY: string = "";
+
+  try {
+    SECRET_KEY = secretKeys[recaptchaType];
+  } catch (e) {
+    return res.status(500).json({ error: "Invalid recaptcha type" });
   }
 
-  const response = await fetch(
-    "https://www.google.com/recaptcha/api/siteverify",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `secret=${SECRET_KEY}&response=${recaptchaValue}`,
-    }
-  );
+  if (!SECRET_KEY) {
+    return res.status(500).json({ error: "RECAPTCHA_SECRET_KEY is not defined" });
+  }
+
+  const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `secret=${SECRET_KEY}&response=${recaptchaValue}`,
+  });
 
   const data = await response.json();
 
