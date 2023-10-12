@@ -241,94 +241,96 @@ const Listings = () => {
             }}
           />
 
-          <Center w="100%">
-            <CollapsibleWidget
-              options={{
-                border: "1px",
-                borderRadius: "4",
-                borderColor: "gray.100",
-              }}
-              buttonProps={{
-                collapsedOnCaption: "הצג סננים נוספים",
-                collapsedOffCaption: "הסתר סננים נוספים",
-                props: {
-                  textStyle: { fontWeight: "bold" },
-                  colorScheme: "gray",
-                  variant: "solid",
-                  size: "sm",
-                },
-              }}
-            >
-              <CapacityFilter
-                capacity={realTimeCapacityFilter}
-                onFilterChange={(value) => {
-                  setRealTimeCapacityFilter(value); // <-- Immediate feedback
-                  debouncedCapacityFilter(value); // <-- Debounced action
-                }}
-              />
+          <CapacityFilter
+            capacity={realTimeCapacityFilter}
+            onFilterChange={(value) => {
+              setRealTimeCapacityFilter(value); // <-- Immediate feedback
+              debouncedCapacityFilter(value); // <-- Debounced action
+            }}
+          />
 
-              <ProtectedSpaceFilter
-                onFilterChange={(values) => {
-                  const data = values.map((value) => value);
-                  setRealTimeProtectedSpaceFilter(data);
-                  debouncedProtectedSpaceFilter(data);
+          {false && (
+            <Center w="100%">
+              <CollapsibleWidget
+                options={{
+                  border: "1px",
+                  borderRadius: "4",
+                  borderColor: "gray.100",
                 }}
-                props={{
-                  mt: 5,
+                buttonProps={{
+                  collapsedOnCaption: "הצג סננים נוספים",
+                  collapsedOffCaption: "הסתר סננים נוספים",
+                  props: {
+                    textStyle: { fontWeight: "bold" },
+                    colorScheme: "gray",
+                    variant: "solid",
+                    size: "sm",
+                  },
                 }}
-                protectedSpaces={protectedSpaceFilter}
-              />
+              >
+                <ProtectedSpaceFilter
+                  onFilterChange={(values) => {
+                    const data = values.map((value) => value);
+                    setRealTimeProtectedSpaceFilter(data);
+                    debouncedProtectedSpaceFilter(data);
+                  }}
+                  props={{
+                    mt: 5,
+                  }}
+                  protectedSpaces={protectedSpaceFilter}
+                />
 
-              <NullableBooleanFilter
-                label="♿️ נגישות לנכים"
-                value={realTimeDisabledAccessibilityFilter}
-                onFilterChange={(value) => {
-                  setRealTimeDisabledAccessibilityFilter(value);
-                  debouncedDisabledAccessibilityFilter(value);
-                }}
-                props={{
-                  mt: 5,
-                }}
-              />
+                <NullableBooleanFilter
+                  label="♿️ נגישות לנכים"
+                  value={realTimeDisabledAccessibilityFilter}
+                  onFilterChange={(value) => {
+                    setRealTimeDisabledAccessibilityFilter(value);
+                    debouncedDisabledAccessibilityFilter(value);
+                  }}
+                  props={{
+                    mt: 5,
+                  }}
+                />
 
-              <NullableBooleanFilter
-                label="🐶 האם אפשר להביא בע״ח"
-                value={realTimePetsFriendlyFilter}
-                onFilterChange={(value) => {
-                  setRealTimePetsFriendlyFilter(value);
-                  debouncedPetsFriendlyFilter(value);
-                }}
-                props={{
-                  mt: 5,
-                }}
-              />
+                <NullableBooleanFilter
+                  label="🐶 האם אפשר להביא בע״ח"
+                  value={realTimePetsFriendlyFilter}
+                  onFilterChange={(value) => {
+                    setRealTimePetsFriendlyFilter(value);
+                    debouncedPetsFriendlyFilter(value);
+                  }}
+                  props={{
+                    mt: 5,
+                  }}
+                />
 
-              <NullableBooleanFilter
-                label="🐶 האם יש בע״ח בדירה"
-                value={realTimePetsExistingFilter}
-                onFilterChange={(value) => {
-                  setRealTimePetsExistingFilter(value);
-                  debouncedPetsExistingFilter(value);
-                }}
-                props={{
-                  mt: 5,
-                }}
-              />
+                <NullableBooleanFilter
+                  label="🐶 האם יש בע״ח בדירה"
+                  value={realTimePetsExistingFilter}
+                  onFilterChange={(value) => {
+                    setRealTimePetsExistingFilter(value);
+                    debouncedPetsExistingFilter(value);
+                  }}
+                  props={{
+                    mt: 5,
+                  }}
+                />
 
-              <NullableBooleanFilter
-                label="🍴 כשר"
-                value={realTimeKosherFilter}
-                onFilterChange={(value) => {
-                  console.log("value=", value);
-                  setRealTimeKosherFilter(value);
-                  debouncedKosherFilter(value);
-                }}
-                props={{
-                  mt: 5,
-                }}
-              />
-            </CollapsibleWidget>
-          </Center>
+                <NullableBooleanFilter
+                  label="🍴 כשר"
+                  value={realTimeKosherFilter}
+                  onFilterChange={(value) => {
+                    console.log("value=", value);
+                    setRealTimeKosherFilter(value);
+                    debouncedKosherFilter(value);
+                  }}
+                  props={{
+                    mt: 5,
+                  }}
+                />
+              </CollapsibleWidget>
+            </Center>
+          )}
           <Divider />
         </VStack>
       </Box>

@@ -36,21 +36,32 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
           <Text>
             <b>🧑‍🤝‍🧑 מקסימום תפוסה:</b> {listing.capacity}
           </Text>
-          <Text>
-            <b>🚨 מרחב מוגן:</b> {protectedSpaceTypeToHebrewString(listing.protectedSpace)}
-          </Text>
-          <Text>
-            <b>♿️ נגישות לנכים: </b> {nullableBooleanToHebrewString(listing.disabledAccessibility)}
-          </Text>
-          <Text>
-            <b>🐶 האם ניתן להביא בע״ח:</b> {nullableBooleanToHebrewString(listing.petsFriendly)}
-          </Text>
-          <Text>
-            <b>🐶 האם יש בע״ח בבית:</b> {nullableBooleanToHebrewString(listing.petsExisting)}
-          </Text>
-          <Text>
-            <b>🍽️ כשר: </b> {nullableBooleanToHebrewString(listing.kosher)}
-          </Text>
+          {listing.protectedSpace && (
+            <Text>
+              <b>🚨 מרחב מוגן:</b> {protectedSpaceTypeToHebrewString(listing.protectedSpace)}
+            </Text>
+          )}
+          {listing.disabledAccessibility && (
+            <Text>
+              <b>♿️ נגישות לנכים: </b>{" "}
+              {nullableBooleanToHebrewString(listing.disabledAccessibility)}
+            </Text>
+          )}
+          {listing.petsFriendly && (
+            <Text>
+              <b>🐶 האם ניתן להביא בע״ח:</b> {nullableBooleanToHebrewString(listing.petsFriendly)}
+            </Text>
+          )}
+          {listing.petsExisting && (
+            <Text>
+              <b>🐶 האם יש בע״ח בבית:</b> {nullableBooleanToHebrewString(listing.petsExisting)}
+            </Text>
+          )}
+          {listing.kosher && (
+            <Text>
+              <b>🍽️ כשר: </b> {nullableBooleanToHebrewString(listing.kosher)}
+            </Text>
+          )}
           {listing.description !== "" && (
             <Text mb={1}>
               <b>ℹ️ מידע נוסף:</b> {listing.description || "אין תיאור"}
