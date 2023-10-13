@@ -76,3 +76,20 @@ export async function createListing(listing: Listing): Promise<Listing> {
 
   return data.listing;
 }
+
+// An API wrapper that increments the phone clicked counter of a listing.
+export async function incrementPhoneClickedCounter(listingId: number) {
+  const response = await fetch("/api/incrementPhoneCounter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ listingId }),
+  });
+
+  const data = await response.json();
+  if (!data.success) {
+    console.error(data.message);
+    throw new Error(data.message);
+  }
+}

@@ -174,7 +174,6 @@ const Listings = () => {
       }
 
       if (response.length < listingPageSize) {
-        console.log(response);
         setShowMoreButton(false);
       }
     } catch (error) {
@@ -259,7 +258,6 @@ const Listings = () => {
             label="🍴 כשר"
             value={realTimeKosherFilter}
             onFilterChange={(value) => {
-              console.log("value=", value);
               setRealTimeKosherFilter(value);
               debouncedKosherFilter(value);
             }}

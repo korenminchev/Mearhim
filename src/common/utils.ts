@@ -5,3 +5,5 @@ export function nullableBooleanToHebrewString(value: boolean | null | undefined)
 
   return value ? "כן" : "לא";
 }
+
+export const isProduction = () => process.env.NODE_ENV == "production";
