@@ -17,6 +17,7 @@ type ListingCardProps = {
 
 export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungColor }) => {
   const [showPhone, setShowPhone] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const onRecaptchaChange = async (value: string | null) => {
@@ -37,6 +38,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
     }
 
     setShowPhone(true);
+    setIsLoading(false);
     try {
       incrementPhoneClickedCounter(listing.id);
     } catch {}
@@ -106,7 +108,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
             <Button
               size="sm"
               colorScheme="gray"
+              isLoading={isLoading}
               onClick={() => {
+                setIsLoading(true);
                 recaptchaRef.current?.execute();
               }}
             >
