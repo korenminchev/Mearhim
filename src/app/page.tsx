@@ -6,7 +6,6 @@ import {
   Center,
   Container,
   Divider,
-  HStack,
   Heading,
   Input,
   Text,
@@ -30,111 +29,69 @@ import ProtectedSpaceFilter, {
 import NullableBooleanFilter from "@/src/app/components/nullable_boolean_filter";
 import { ProtectedSpaceType } from "@/src/common/models/protected_space";
 import { incrementPhoneClickedCounter } from "@/src/app/utils/api";
-import { isProduction } from "../common/utils";
+import { ReCaptchaProvider } from "@/src/app/utils/providers/recaptcha_provider";
 
 const Listings = () => {
   const recaptchaRef = createRef<ReCAPTCHA>();
   const [recaptchaSolved, setRecaptchaSolved] = useState<boolean>(false);
 
-  const onRecaptchaSuccess = async (value: string | null) => {
-    console.log("recaptcha value: ", value);
-    if (!value) {
-      return;
-    }
-
-    const response = await fetch("/api/verifyRecaptcha", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recaptchaValue: value,
-        recaptchaType: "showPhone",
-      }),
-    });
-
-    const recaptchaData = await response.json();
-    if (!recaptchaData.success) {
-      return;
-    }
-    setRecaptchaSolved(true);
-
-    try {
-      incrementPhoneClickedCounter(listing.id);
-    } catch {}
-    console.log(recaptchaRef.current);
-    recaptchaRef.current?.reset();
-  };
-
   const [realTimeCitySearch, setRealTimeCitySearch] = useState<string>("");
   const [citySearch, setCitySearch] = useState<string>("");
   const debouncedCitySearch = useCallback(
     _.debounce((value: string) => setCitySearch(value), 300),
-    [],
+    []
   );
 
-  const [realTimeCapacityFilter, setRealTimeCapacityFilter] =
-    useState<number>(2);
+  const [realTimeCapacityFilter, setRealTimeCapacityFilter] = useState<number>(2);
   const [capacityFilter, setCapacityFilter] = useState<number>(2);
   const debouncedCapacityFilter = useCallback(
     _.debounce((value: number) => setCapacityFilter(value), 300),
-    [],
+    []
   );
 
-  const [realTimeProtectedSpaceFilter, setRealTimeProtectedSpaceFilter] =
-    useState<ProtectedSpaceOption[]>([]);
-  const [protectedSpaceFilter, setProtectedSpaceFilter] = useState<
+  const [realTimeProtectedSpaceFilter, setRealTimeProtectedSpaceFilter] = useState<
     ProtectedSpaceOption[]
   >([]);
+  const [protectedSpaceFilter, setProtectedSpaceFilter] = useState<ProtectedSpaceOption[]>([]);
   const debouncedProtectedSpaceFilter = useCallback(
-    _.debounce(
-      (value: ProtectedSpaceOption[]) => setProtectedSpaceFilter(value),
-      300,
-    ),
-    [],
+    _.debounce((value: ProtectedSpaceOption[]) => setProtectedSpaceFilter(value), 300),
+    []
   );
 
-  const [realTimePetsFriendlyFilter, setRealTimePetsFriendlyFilter] = useState<
-    boolean | null
-  >(null);
-  const [petsFriendlyFilter, setPetsFriendlyFilter] = useState<boolean | null>(
-    null,
+  const [realTimePetsFriendlyFilter, setRealTimePetsFriendlyFilter] = useState<boolean | null>(
+    null
   );
+  const [petsFriendlyFilter, setPetsFriendlyFilter] = useState<boolean | null>(null);
   const debouncedPetsFriendlyFilter = useCallback(
     _.debounce((value: boolean | null) => setPetsFriendlyFilter(value), 300),
-    [],
+    []
   );
 
-  const [realTimePetsExistingFilter, setRealTimePetsExistingFilter] = useState<
-    boolean | null
-  >(null);
-  const [petsExistingFilter, setPetsExistingFilter] = useState<boolean | null>(
-    null,
+  const [realTimePetsExistingFilter, setRealTimePetsExistingFilter] = useState<boolean | null>(
+    null
   );
+  const [petsExistingFilter, setPetsExistingFilter] = useState<boolean | null>(null);
   const debouncedPetsExistingFilter = useCallback(
     _.debounce((value: boolean | null) => setPetsExistingFilter(value), 300),
-    [],
+    []
   );
 
-  const [
-    realTimeDisabledAccessibilityFilter,
-    setRealTimeDisabledAccessibilityFilter,
-  ] = useState<boolean | null>(null);
-  const [disabledAccessibilityFilter, setDisabledAccessibilityFilter] =
-    useState<boolean | null>(null);
-  const debouncedDisabledAccessibilityFilter = useCallback(
-    _.debounce(
-      (value: boolean | null) => setDisabledAccessibilityFilter(value),
-      300,
-    ),
-    [],
-  );
-
-  const [realTimeKosherFilter, setRealTimeKosherFilter] = useState<
+  const [realTimeDisabledAccessibilityFilter, setRealTimeDisabledAccessibilityFilter] = useState<
     boolean | null
   >(null);
+  const [disabledAccessibilityFilter, setDisabledAccessibilityFilter] = useState<boolean | null>(
+    null
+  );
+  const debouncedDisabledAccessibilityFilter = useCallback(
+    _.debounce((value: boolean | null) => setDisabledAccessibilityFilter(value), 300),
+    []
+  );
+
+  const [realTimeKosherFilter, setRealTimeKosherFilter] = useState<boolean | null>(null);
   const [kosherFilter, setKosherFilter] = useState<boolean | null>(null);
   const debouncedKosherFilter = useCallback(
     _.debounce((value: boolean | null) => setKosherFilter(value), 300),
-    [],
+    []
   );
 
   const [page, setPage] = useState<number>(0);
@@ -161,7 +118,7 @@ const Listings = () => {
         petsFriendlyFilter,
         petsExistingFilter,
         disabledAccessibilityFilter,
-        kosherFilter,
+        kosherFilter
       );
     }
   }, [
@@ -185,7 +142,7 @@ const Listings = () => {
       petsFriendlyFilter,
       petsExistingFilter,
       disabledAccessibilityFilter,
-      kosherFilter,
+      kosherFilter
     );
   }, [page]);
 
@@ -197,7 +154,7 @@ const Listings = () => {
     petsFriendly: boolean | null,
     petsExisting: boolean | null,
     disabledAccessibility: boolean | null,
-    kosher: boolean | null,
+    kosher: boolean | null
   ) => {
     if (fetching.current) return;
     fetching.current = true;
@@ -215,7 +172,7 @@ const Listings = () => {
         petsFriendly,
         petsExisting,
         disabledAccessibility,
-        kosher,
+        kosher
       );
       if (response) {
         setListings((prevListings) => prevListings.concat(response));
@@ -234,14 +191,7 @@ const Listings = () => {
 
   return (
     <>
-      <Container
-        py="40px"
-        maxW={"fit-content"}
-        centerContent
-        as="main"
-        maxH="100vh"
-        w="100%"
-      >
+      <Container py="40px" maxW={"fit-content"} centerContent as="main" maxH="100vh" w="100%">
         <Box pb={5} maxW={"fit-content"} w="100%">
           <Center>
             <Heading mb={4}>🏠 אתר &quot;מארחים&quot; 🏠</Heading>
@@ -289,52 +239,65 @@ const Listings = () => {
                 debouncedCitySearch(e.target.value); // <-- Debounced action
               }}
             />
-            <CapacityFilter
-              capacity={realTimeCapacityFilter}
-              onFilterChange={(value) => {
-                setRealTimeCapacityFilter(value); // <-- Immediate feedback
-                debouncedCapacityFilter(value); // <-- Debounced action
+            <CollapsibleWidget
+              buttonProps={{
+                collapsedOnCaption: "הצג סננים נוספים",
+                collapsedOffCaption: "הסתר סננים נוספים",
+                props: {
+                  colorScheme: "gray",
+                  variant: "solid",
+                  size: "sm",
+                },
               }}
-            />
+            >
+              <CapacityFilter
+                capacity={realTimeCapacityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeCapacityFilter(value); // <-- Immediate feedback
+                  debouncedCapacityFilter(value); // <-- Debounced action
+                }}
+              />
 
-            <ProtectedSpaceFilter
-              onFilterChange={(values) => {
-                const data = values.map((value) => value);
-                setRealTimeProtectedSpaceFilter(data);
-                debouncedProtectedSpaceFilter(data);
-              }}
-              props={{
-                mt: 4,
-                w: "100%",
-              }}
-              protectedSpaces={protectedSpaceFilter}
-            />
+              <ProtectedSpaceFilter
+                onFilterChange={(values) => {
+                  const data = values.map((value) => value);
+                  setRealTimeProtectedSpaceFilter(data);
+                  debouncedProtectedSpaceFilter(data);
+                }}
+                props={{
+                  mt: 4,
+                  w: "100%",
+                }}
+                protectedSpaces={protectedSpaceFilter}
+              />
 
-            <NullableBooleanFilter
-              label="🍴 כשר"
-              value={realTimeKosherFilter}
-              onFilterChange={(value) => {
-                setRealTimeKosherFilter(value);
-                debouncedKosherFilter(value);
-              }}
-              props={{
-                mt: 4,
-              }}
-            />
+              <NullableBooleanFilter
+                label="🍴 כשר"
+                value={realTimeKosherFilter}
+                onFilterChange={(value) => {
+                  setRealTimeKosherFilter(value);
+                  debouncedKosherFilter(value);
+                }}
+                props={{
+                  mt: 4,
+                }}
+              />
+
+              <NullableBooleanFilter
+                label="♿️ נגישות לנכים"
+                value={realTimeDisabledAccessibilityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeDisabledAccessibilityFilter(value);
+                  debouncedDisabledAccessibilityFilter(value);
+                }}
+                props={{
+                  mt: 4,
+                }}
+              />
+            </CollapsibleWidget>
 
             {false && (
               <div>
-                <NullableBooleanFilter
-                  label="♿️ נגישות לנכים"
-                  value={realTimeDisabledAccessibilityFilter}
-                  onFilterChange={(value) => {
-                    setRealTimeDisabledAccessibilityFilter(value);
-                    debouncedDisabledAccessibilityFilter(value);
-                  }}
-                  props={{
-                    mt: 4,
-                  }}
-                />
                 <NullableBooleanFilter
                   label="🐶 האם אפשר להביא בע״ח"
                   value={realTimePetsFriendlyFilter}
@@ -376,39 +339,26 @@ const Listings = () => {
             </Text>
           </Box>
 
-          {listings.map((listing) => {
-            return (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                backgroundColor={listing.pinned ? "green.100" : undefined}
-                recaptchaRef={recaptchaRef}
-                recaptchaSolved={recaptchaSolved}
-              />
-            );
-          })}
+          <ReCaptchaProvider>
+            {listings.map((listing) => {
+              return (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  backgroundColor={listing.pinned ? "green.100" : undefined}
+                  incrementCounter={incrementPhoneClickedCounter}
+                />
+              );
+            })}
+          </ReCaptchaProvider>
 
           {showMoreButton ? (
-            <Button
-              m={4}
-              onClick={(e) => setPage(page + 1)}
-              isLoading={isFetching}
-            >
+            <Button m={4} onClick={(e) => setPage(page + 1)} isLoading={isFetching}>
               הצג עוד
             </Button>
           ) : null}
         </VStack>
       </Container>
-      <ReCAPTCHA
-        ref={recaptchaRef}
-        size="invisible"
-        onChange={onRecaptchaSuccess}
-        sitekey={
-          isProduction()
-            ? "6LdhAZgoAAAAANy_4Vh8NLfDHy8VLJFcMXBeyDIi"
-            : "6LeRAJgoAAAAAOB5NmcfgPBrZ3hH6cyuDA78q3v6"
-        }
-      />
     </>
   );
 };

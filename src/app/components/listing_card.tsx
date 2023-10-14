@@ -1,31 +1,61 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Text, Icon, Flex, Link, Button } from "@chakra-ui/react";
 import { PhoneIcon } from "@chakra-ui/icons";
 
 import { Listing } from "@/src/common/models/listing";
 import { protectedSpaceTypeToHebrewString } from "@/src/common/models/protected_space";
 import { nullableBooleanToHebrewString } from "@/src/common/utils";
-
-import type ReCAPTCHA from "react-google-recaptcha";
-import type { RefObject } from "react";
+import { useReCaptcha } from "@/src/app/utils/providers/recaptcha_provider";
 
 type ListingCardProps = {
   listing: Listing;
-  backgroungColor?: string;
-  recaptchaRef: RefObject<ReCAPTCHA | undefined>;
-  recaptchaSolved: boolean;
+  backgroundColor?: string;
+  incrementCounter?: (listingId: number) => Promise<void>;
 };
 
 export const ListingCard: React.FC<ListingCardProps> = ({
   listing,
-  backgroungColor,
-  recaptchaRef,
-  recaptchaSolved,
+  backgroundColor,
+  incrementCounter,
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const {
+    activeListingId,
+    setActiveListingId,
+    recaptchaSolved,
+    setRecaptchaSolved,
+    recaptchaExited,
+    setRecaptchaExited,
+    recaptchaRef,
+  } = useReCaptcha();
+
   const [showPhone, setShowPhone] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (activeListingId === listing.id && recaptchaSolved) {
+      setShowPhone(true);
+      setIsLoading(false);
+      setActiveListingId(null);
+      setRecaptchaSolved(false);
+      incrementCounter?.(listing.id);
+    }
+
+    if (recaptchaExited) {
+      setIsLoading(false);
+      setActiveListingId(null);
+      setRecaptchaExited(false);
+    }
+  }, [
+    activeListingId,
+    setActiveListingId,
+    recaptchaSolved,
+    setRecaptchaSolved,
+    recaptchaExited,
+    setRecaptchaExited,
+    listing.id,
+  ]);
 
   return (
     <Box
@@ -34,7 +64,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       borderRadius="lg"
       overflow="hidden"
       p={4}
-      background={backgroungColor}
+      background={backgroundColor}
     >
       <Flex direction="row">
         <Box flex="2">
@@ -49,8 +79,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           </Text>
           {listing.protectedSpace && (
             <Text>
-              <b>🚨 מרחב מוגן:</b>{" "}
-              {protectedSpaceTypeToHebrewString(listing.protectedSpace)}
+              <b>🚨 מרחב מוגן:</b> {protectedSpaceTypeToHebrewString(listing.protectedSpace)}
             </Text>
           )}
           {listing.disabledAccessibility && (
@@ -61,14 +90,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           )}
           {listing.petsFriendly && (
             <Text>
-              <b>🐶 האם ניתן להביא בע״ח:</b>{" "}
-              {nullableBooleanToHebrewString(listing.petsFriendly)}
+              <b>🐶 האם ניתן להביא בע״ח:</b> {nullableBooleanToHebrewString(listing.petsFriendly)}
             </Text>
           )}
           {listing.petsExisting && (
             <Text>
-              <b>🐶 האם יש בע״ח בבית:</b>{" "}
-              {nullableBooleanToHebrewString(listing.petsExisting)}
+              <b>🐶 האם יש בע״ח בבית:</b> {nullableBooleanToHebrewString(listing.petsExisting)}
             </Text>
           )}
           {listing.kosher && (
@@ -95,11 +122,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               colorScheme="gray"
               isLoading={isLoading}
               onClick={() => {
-                if (recaptchaSolved) {
-                  setShowPhone(true);
-                } else {
-                  recaptchaRef?.current?.execute();
-                }
+                setIsLoading(true);
+                setActiveListingId(listing.id);
+                recaptchaRef.current?.execute();
               }}
             >
               הצג מספר
