@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Alert,
   Box,
   Button,
   Center,
@@ -250,6 +251,7 @@ const Listings = () => {
                 },
               }}
             >
+              <Alert status="warning">ייתכן וחלק מהסננים לא יעבדו על מודעות ישנות 🙏</Alert>
               <CapacityFilter
                 capacity={realTimeCapacityFilter}
                 onFilterChange={(value) => {
@@ -294,34 +296,30 @@ const Listings = () => {
                   mt: 4,
                 }}
               />
-            </CollapsibleWidget>
 
-            {false && (
-              <div>
-                <NullableBooleanFilter
-                  label="🐶 האם אפשר להביא בע״ח"
-                  value={realTimePetsFriendlyFilter}
-                  onFilterChange={(value) => {
-                    setRealTimePetsFriendlyFilter(value);
-                    debouncedPetsFriendlyFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-                <NullableBooleanFilter
-                  label="🐶 האם יש בע״ח בדירה"
-                  value={realTimePetsExistingFilter}
-                  onFilterChange={(value) => {
-                    setRealTimePetsExistingFilter(value);
-                    debouncedPetsExistingFilter(value);
-                  }}
-                  props={{
-                    mt: 5,
-                  }}
-                />
-              </div>
-            )}
+              <NullableBooleanFilter
+                label="🐶 האם אפשר להביא בע״ח"
+                value={realTimePetsFriendlyFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsFriendlyFilter(value);
+                  debouncedPetsFriendlyFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+              <NullableBooleanFilter
+                label="🐶 האם יש בע״ח בדירה"
+                value={realTimePetsExistingFilter}
+                onFilterChange={(value) => {
+                  setRealTimePetsExistingFilter(value);
+                  debouncedPetsExistingFilter(value);
+                }}
+                props={{
+                  mt: 5,
+                }}
+              />
+            </CollapsibleWidget>
             <Divider mt={2} />
           </VStack>
         </Box>
