@@ -1,48 +1,27 @@
-"use client";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Box } from "@chakra-ui/react";
+import Signout from "./Signout";
 
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
-import { Box, Button } from "@chakra-ui/react";
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
 
-import type { NextPage } from "next";
-import type { Session } from "@supabase/auth-helpers-nextjs";
+export default async function AdminPortal() {
+  const supabase = createServerComponentClient({ cookies });
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-const AdminPortal: NextPage = () => {
-  const [session, setSession] = useState<Session>();
-  const supabase = createClientComponentClient();
-  const router = useRouter();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.push("/admin-portal/login");
-        return;
-      }
-      setSession(session);
-    };
-
-    checkSession();
-  }, []);
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      router.push("/");
-    }
-  };
+  if (!session) {
+    redirect("/admin-portal/login");
+  }
 
   return (
     <Box>
       <h1>Admin portal</h1>
       <h1>User: {session && session.user.email}</h1>
-      <Button onClick={handleSignOut}>Sign out</Button>
+      <Signout />
     </Box>
   );
-};
-
-export default AdminPortal;
+}
