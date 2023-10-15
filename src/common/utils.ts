@@ -7,7 +7,6 @@ export function nullableBooleanToHebrewString(value: boolean | null | undefined)
 }
 
 export const isProduction = () => {
-  console.log(process.env.NODE_ENV); 
   return process.env.NODE_ENV == "production";
 }
 
