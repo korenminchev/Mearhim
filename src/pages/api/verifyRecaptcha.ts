@@ -36,6 +36,8 @@ const verifyRecaptcha = async (req: NextApiRequest, res: NextApiResponse) => {
   if (data.success) {
     res.status(200).json({ success: true });
   } else {
+    console.log(response);
+    console.log(data);
     res.status(400).json({ success: false });
   }
 };

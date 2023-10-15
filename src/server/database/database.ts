@@ -12,7 +12,8 @@ export const fetchListings = async (
   petsFriendly: boolean | null,
   petsExisting: boolean | null,
   disabledAccessibility: boolean | null,
-  kosher: boolean | null
+  kosher: boolean | null,
+  lastHour: boolean | null
 ) => {
   // Start building the query.
   let query = supabase
@@ -47,6 +48,12 @@ export const fetchListings = async (
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .range(page * listingPageSize, (page + 1) * listingPageSize - 1);
+
+  
+  if (lastHour) {
+    const oneHourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
+    query = query.gte("created_at", oneHourAgo.toISOString());
+  }
 
   // Execute the query.
   const { data, error } = await query;

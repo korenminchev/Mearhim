@@ -37,6 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const petsExisting = parseBoolean(req.query.petsExisting);
   const disabledAccessibility = parseBoolean(req.query.disabledAccessibility);
   const kosher = parseBoolean(req.query.kosher);
+  const lastHour = parseBoolean(req.query.lastHour);
 
   const protectedSpaces = Array<ProtectedSpaceType>();
   if (req.query.protectedSpace !== undefined) {
@@ -55,7 +56,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     petsFriendly,
     petsExisting,
     disabledAccessibility,
-    kosher
+    kosher,
+    lastHour
+
   ).catch((error) => {
     console.log(error);
   });

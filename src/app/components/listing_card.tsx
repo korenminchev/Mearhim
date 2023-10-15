@@ -1,49 +1,61 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import React, { useEffect, useState } from "react";
 import { Box, Text, Icon, Flex, Link, Button } from "@chakra-ui/react";
 import { PhoneIcon } from "@chakra-ui/icons";
 
 import { Listing } from "@/src/common/models/listing";
 import { protectedSpaceTypeToHebrewString } from "@/src/common/models/protected_space";
-import { isProduction, nullableBooleanToHebrewString } from "@/src/common/utils";
-import { incrementPhoneClickedCounter } from "../utils/api";
+import { nullableBooleanToHebrewString } from "@/src/common/utils";
+import { useReCaptcha } from "@/src/app/utils/providers/recaptcha_provider";
 
 type ListingCardProps = {
   listing: Listing;
-  backgroungColor?: string;
+  backgroundColor?: string;
+  incrementCounter?: (listingId: number) => Promise<void>;
 };
 
-export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungColor }) => {
+export const ListingCard: React.FC<ListingCardProps> = ({
+  listing,
+  backgroundColor,
+  incrementCounter,
+}) => {
+  const {
+    activeListingId,
+    setActiveListingId,
+    recaptchaSolved,
+    setRecaptchaSolved,
+    recaptchaExited,
+    setRecaptchaExited,
+    recaptchaRef,
+  } = useReCaptcha();
+
   const [showPhone, setShowPhone] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const onRecaptchaChange = async (value: string | null) => {
-    console.log("recaptcha value: ", value);
-    if (!value) {
-      return;
+  useEffect(() => {
+    if (activeListingId === listing.id && recaptchaSolved) {
+      setShowPhone(true);
+      setIsLoading(false);
+      setActiveListingId(null);
+      setRecaptchaSolved(false);
+      incrementCounter?.(listing.id);
     }
 
-    const response = await fetch("/api/verifyRecaptcha", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recaptchaValue: value, recaptchaType: "showPhone" }),
-    });
-
-    const recaptchaData = await response.json();
-    if (!recaptchaData.success) {
-      return;
+    if (recaptchaExited) {
+      setIsLoading(false);
+      setActiveListingId(null);
+      setRecaptchaExited(false);
     }
-
-    setShowPhone(true);
-    setIsLoading(false);
-    try {
-      incrementPhoneClickedCounter(listing.id);
-    } catch {}
-    recaptchaRef.current?.reset();
-  };
+  }, [
+    activeListingId,
+    setActiveListingId,
+    recaptchaSolved,
+    setRecaptchaSolved,
+    recaptchaExited,
+    setRecaptchaExited,
+    listing.id,
+  ]);
 
   return (
     <Box
@@ -52,7 +64,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
       borderRadius="lg"
       overflow="hidden"
       p={4}
-      background={backgroungColor}
+      background={backgroundColor}
     >
       <Flex direction="row">
         <Box flex="2">
@@ -111,23 +123,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, backgroungCol
               isLoading={isLoading}
               onClick={() => {
                 setIsLoading(true);
+                setActiveListingId(listing.id);
                 recaptchaRef.current?.execute();
               }}
             >
               הצג מספר
             </Button>
           )}
-
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey={
-              isProduction()
-                ? "6LdhAZgoAAAAANy_4Vh8NLfDHy8VLJFcMXBeyDIi"
-                : "6LeRAJgoAAAAAOB5NmcfgPBrZ3hH6cyuDA78q3v6"
-            }
-            size="invisible"
-            onChange={onRecaptchaChange}
-          />
         </Box>
       </Flex>
     </Box>

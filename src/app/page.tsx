@@ -1,20 +1,21 @@
 "use client";
 
 import {
+  Alert,
   Box,
   Button,
   Center,
   Container,
   Divider,
-  HStack,
   Heading,
   Input,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createRef, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import _ from "lodash";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import ReadMoreComponent from "@/src/app/components/read_more_component";
 import CapacityFilter from "@/src/app/components/capacity_filter";
@@ -28,8 +29,13 @@ import ProtectedSpaceFilter, {
 } from "@/src/app/components/protected_space_filter";
 import NullableBooleanFilter from "@/src/app/components/nullable_boolean_filter";
 import { ProtectedSpaceType } from "@/src/common/models/protected_space";
+import { incrementPhoneClickedCounter } from "@/src/app/utils/api";
+import { ReCaptchaProvider } from "@/src/app/utils/providers/recaptcha_provider";
 
 const Listings = () => {
+  const recaptchaRef = createRef<ReCAPTCHA>();
+  const [recaptchaSolved, setRecaptchaSolved] = useState<boolean>(false);
+
   const [realTimeCitySearch, setRealTimeCitySearch] = useState<string>("");
   const [citySearch, setCitySearch] = useState<string>("");
   const debouncedCitySearch = useCallback(
@@ -185,89 +191,100 @@ const Listings = () => {
   };
 
   return (
-    <Container py="40px" maxW={"fit-content"} centerContent as="main" maxH="100vh" w="100%">
-      <Box pb={5} maxW={"fit-content"} w="100%">
-        <Center>
-          <Heading mb={4}>🏠 אתר &quot;מארחים&quot; 🏠</Heading>
-        </Center>
-        <Center>
-          <ReadMoreComponent
-            content={`במטרה להקל על התושבים ולהעניק להם קצת שקט, החלטנו להקים אתר בו תוכלו למצוא מידע על משפחות מארחות שמוכנות לפתוח את דלתות בתיהם בלב רחב. זאת על מנת לאפשר למי שמעוניין להתארח או לברוח מהבלאגן באופן זמני.
+    <>
+      <Container py="40px" maxW={"fit-content"} centerContent as="main" maxH="100vh" w="100%">
+        <Box pb={5} maxW={"fit-content"} w="100%">
+          <Center>
+            <Heading mb={4}>🏠 אתר &quot;מארחים&quot; 🏠</Heading>
+          </Center>
+          <Center>
+            <ReadMoreComponent
+              content={`במטרה להקל על התושבים ולהעניק להם קצת שקט, החלטנו להקים אתר בו תוכלו למצוא מידע על משפחות מארחות שמוכנות לפתוח את דלתות בתיהם בלב רחב. זאת על מנת לאפשר למי שמעוניין להתארח או לברוח מהבלאגן באופן זמני.
 בהתאם להתפשטות המצב הביטחוני והרקטות המתמשכות בדרום הארץ, אנו פונים אל הקהל הרחב לתמיכה וסיוע לתושבי הדרום בימים הקשים אלה.
 אנו ממליצים ומבקשים מכלל הציבור לשתף את ההודעה ולהעבירה הלאה כמה שיותר, כדי להפיק מקסימום תועלת מהאתר ומהמיזם, ובכך לאפשר למספר הגדול ביותר של משפחות למצוא מקום מוגן וחם בו יוכלו להתארח.`}
-            limit={150}
-          ></ReadMoreComponent>
-        </Center>
-        <VStack w="100%">
-          <Link href="/postListing" passHref>
-            <Button variant={"solid"} colorScheme="green" size={"sm"}>
-              לפרסום מודעה חדשה
-            </Button>
-          </Link>
-          <Link
-            href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..."
-            target="_blank"
-            passHref
-          >
-            <Button variant={"solid"} colorScheme="red" size={"sm"}>
-              לעריכת/הסרת מודעה קיימת
-            </Button>
-          </Link>
-          <Link href="https://wa.me/+972548816044" target="_blank" passHref>
-            <Button variant={"solid"} colorScheme="blue" size={"sm"}>
-              למידע נוסף ושאלות
-            </Button>
-          </Link>
-          <Divider margin={4} />
-          <Center>
-            <Heading size={"md"} mt={1} mb={2}>
-              🔍 סינון וחיפוש
-            </Heading>
+              limit={150}
+            ></ReadMoreComponent>
           </Center>
-          <Input
-            placeholder="חיפוש לפי ישוב"
-            value={realTimeCitySearch}
-            size={"sm"}
-            onChange={(e) => {
-              setRealTimeCitySearch(e.target.value); // <-- Immediate feedback
-              debouncedCitySearch(e.target.value); // <-- Debounced action
-            }}
-          />
-          <CapacityFilter
-            capacity={realTimeCapacityFilter}
-            onFilterChange={(value) => {
-              setRealTimeCapacityFilter(value); // <-- Immediate feedback
-              debouncedCapacityFilter(value); // <-- Debounced action
-            }}
-          />
+          <VStack w="100%">
+            <Link href="/postListing" passHref>
+              <Button variant={"solid"} colorScheme="green" size={"sm"}>
+                לפרסום מודעה חדשה
+              </Button>
+            </Link>
+            <Link
+              href="https://wa.me/+972548816044?text=היי%20אני%20רוצה..."
+              target="_blank"
+              passHref
+            >
+              <Button variant={"solid"} colorScheme="red" size={"sm"}>
+                לעריכת/הסרת מודעה קיימת
+              </Button>
+            </Link>
+            <Link href="https://wa.me/+972548816044" target="_blank" passHref>
+              <Button variant={"solid"} colorScheme="blue" size={"sm"}>
+                למידע נוסף ושאלות
+              </Button>
+            </Link>
+            <Divider margin={4} />
+            <Center>
+              <Heading size={"md"} mt={1} mb={2}>
+                🔍 סינון וחיפוש
+              </Heading>
+            </Center>
+            <Input
+              placeholder="חיפוש לפי ישוב"
+              value={realTimeCitySearch}
+              size={"sm"}
+              onChange={(e) => {
+                setRealTimeCitySearch(e.target.value); // <-- Immediate feedback
+                debouncedCitySearch(e.target.value); // <-- Debounced action
+              }}
+            />
+            <CollapsibleWidget
+              buttonProps={{
+                collapsedOnCaption: "הצג סננים נוספים",
+                collapsedOffCaption: "הסתר סננים נוספים",
+                props: {
+                  colorScheme: "gray",
+                  variant: "solid",
+                  size: "sm",
+                },
+              }}
+            >
+              <Alert status="warning">ייתכן וחלק מהסננים לא יעבדו על מודעות ישנות 🙏</Alert>
+              <CapacityFilter
+                capacity={realTimeCapacityFilter}
+                onFilterChange={(value) => {
+                  setRealTimeCapacityFilter(value); // <-- Immediate feedback
+                  debouncedCapacityFilter(value); // <-- Debounced action
+                }}
+              />
 
-          <ProtectedSpaceFilter
-            onFilterChange={(values) => {
-              const data = values.map((value) => value);
-              setRealTimeProtectedSpaceFilter(data);
-              debouncedProtectedSpaceFilter(data);
-            }}
-            props={{
-              mt: 4,
-              w: "100%",
-            }}
-            protectedSpaces={protectedSpaceFilter}
-          />
+              <ProtectedSpaceFilter
+                onFilterChange={(values) => {
+                  const data = values.map((value) => value);
+                  setRealTimeProtectedSpaceFilter(data);
+                  debouncedProtectedSpaceFilter(data);
+                }}
+                props={{
+                  mt: 4,
+                  w: "100%",
+                }}
+                protectedSpaces={protectedSpaceFilter}
+              />
 
-          <NullableBooleanFilter
-            label="🍴 כשר"
-            value={realTimeKosherFilter}
-            onFilterChange={(value) => {
-              setRealTimeKosherFilter(value);
-              debouncedKosherFilter(value);
-            }}
-            props={{
-              mt: 4,
-            }}
-          />
+              <NullableBooleanFilter
+                label="🍴 כשר"
+                value={realTimeKosherFilter}
+                onFilterChange={(value) => {
+                  setRealTimeKosherFilter(value);
+                  debouncedKosherFilter(value);
+                }}
+                props={{
+                  mt: 4,
+                }}
+              />
 
-          {false && (
-            <div>
               <NullableBooleanFilter
                 label="♿️ נגישות לנכים"
                 value={realTimeDisabledAccessibilityFilter}
@@ -279,6 +296,7 @@ const Listings = () => {
                   mt: 4,
                 }}
               />
+
               <NullableBooleanFilter
                 label="🐶 האם אפשר להביא בע״ח"
                 value={realTimePetsFriendlyFilter}
@@ -301,42 +319,45 @@ const Listings = () => {
                   mt: 5,
                 }}
               />
-            </div>
-          )}
-          <Divider mt={2} />
-        </VStack>
-      </Box>
-
-      <VStack spacing={2} w={"95%"}>
-        <Center>
-          <Heading size={"md"} mb={2}>
-            📊 תוצאות
-          </Heading>
-        </Center>
-
-        <Box>
-          <Text fontSize="me" mb={4} textAlign={"center"}>
-            <b>מספר המודעות המוצגות: {listings.length}</b>
-          </Text>
+            </CollapsibleWidget>
+            <Divider mt={2} />
+          </VStack>
         </Box>
 
-        {listings.map((listing) => {
-          return (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              backgroungColor={listing.pinned ? "green.100" : undefined}
-            />
-          );
-        })}
+        <VStack spacing={2} w={"95%"}>
+          <Center>
+            <Heading size={"md"} mb={2}>
+              📊 תוצאות
+            </Heading>
+          </Center>
 
-        {showMoreButton ? (
-          <Button m={4} onClick={(e) => setPage(page + 1)} isLoading={isFetching}>
-            הצג עוד
-          </Button>
-        ) : null}
-      </VStack>
-    </Container>
+          <Box>
+            <Text fontSize="me" mb={4} textAlign={"center"}>
+              <b>מספר המודעות המוצגות: {listings.length}</b>
+            </Text>
+          </Box>
+
+          <ReCaptchaProvider>
+            {listings.map((listing) => {
+              return (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  backgroundColor={listing.pinned ? "green.100" : undefined}
+                  incrementCounter={incrementPhoneClickedCounter}
+                />
+              );
+            })}
+          </ReCaptchaProvider>
+
+          {showMoreButton ? (
+            <Button m={4} onClick={(e) => setPage(page + 1)} isLoading={isFetching}>
+              הצג עוד
+            </Button>
+          ) : null}
+        </VStack>
+      </Container>
+    </>
   );
 };
 
